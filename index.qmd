@@ -1,0 +1,386 @@
+---
+format: 
+  revealjs:
+    theme: ["theme/q-theme.scss"]
+    slide-number: c/t
+    code-copy: true
+    center-title-slide: false
+    include-in-header: heading-meta.html
+    code-link: true
+    code-overflow: wrap
+    highlight-style: a11y
+    height: 1080
+    width: 1920
+execute: 
+  eval: true
+  echo: false
+---
+
+<h1> Data Visualization Workshop </h1>
+
+<h2> with R shiny and Shiny Assistant </h2>
+
+<hr>
+
+<h3> Dr. Xindi (Cindy) Hu, Assistant Professor at GWSPH</h3>
+
+<h3> 03-21-2025</h3>
+<br>
+
+<h3> `r fontawesome::fa("github", "black")` &nbsp; [github.com/xindyhu/reach-data-viz-workshop](https://github.com/xindyhu/reach-data-viz-workshop.git)
+
+![](img/gw_primary_2c_0.png){.absolute top=680 left=1650 width="300"}
+![](img/reach-logo.jpg){.absolute top=680 left=1250 width="300"}
+
+## Meet Your Instructor 👩
+::: columns
+::: {.column width="25%"}
+![](img/XindiHu_Headshot_2024.jpg){style="border-radius: 70%; width: 70%; display: block; margin: auto;"}
+:::
+
+::: {.column width="75%"}
+
+### **Xindi (Cindy) Hu, ScD**
+**Assistant Professor, George Washington University**
+
+- Environmental Data Scientist and Environmental Health Researcher
+- 2024- Water, Health, Opportunity Lab at GW
+- 2018-2024 Principal Data Scientist at Mathematica, Inc.
+- 2018 ScD in Environmental Health, Harvard T.H. Chan School of Public Health
+- 2014 MS in Environmental Health, Harvard T.H. Chan School of Public Health
+- 2012 BS in Environmental Science, Peking University, China
+
+:::
+:::
+
+## Learning objectives
+* Understand the basics of data visualization
+* Learn how to create interactive data visualization using R Shiny
+* Learn how to use Shiny Assistant to create interactive data visualization
+
+## Outline for today
+<span style="font-weight: bold; color: orange">1. How humans see data</span>
+
+2. Introduction to R Shiny
+
+3. Introduction to Shiny Assistant
+
+4. Next-steps
+
+## Acknowledgements
+
+Much of the content in this section is from  [John Rauser's talk](https://www.youtube.com/watch?v=fSgEeI2Xpdc) on YouTube and [JP Helveston's course](https://eda.seas.gwu.edu/2024-Fall/class/6-visualizing-information) on Exploratory Data Analysis
+
+## Good data visualization is optimized for our <span style="font-weight: bold; color: orange">visual-memory system</span>
+
+- Helps us **understand trends and patterns**
+
+- Makes data **more accessible** to different audiences
+
+- Useful in **decision-making** and **communication**
+
+. . . 
+
+![](img/memory-chart.png){style="width: 70%; display: block; margin: auto;"}
+
+## The power of pre-attentive processing
+Count all the 5s in the following image
+
+. . .
+
+![](img/fives-1.png){style="width: 60%; display: block; margin: auto;"}
+
+## The power of pre-attentive processing
+Count all the 5s in the following image
+
+. . .
+
+![](img/fives-2.png){style="width: 60%; display: block; margin: auto;"}
+
+## What is <span style="font-weight: bold; color: orange">pre-attentive processing</span>?
+
+- **Rapid, automatic processing of visual information** before conscious attention kicks in.
+- Happens within **<250 milliseconds**.
+- Helps identify key patterns **without effort**.
+
+::: {.column width="70%"}
+
+![](img/datylon-blog-mind-your-data-visualization-system-1-2-green.webp){style="width: 70%; display: block; margin: auto;"}
+:::
+
+::: {.column width="30%"}
+![](img/kahneman_book.jpeg){style="width: 77%; display: block; margin: auto;"}
+:::
+
+## Not all pre-attentive features are created equal
+
+| Feature Type | Example |
+|-------------|---------|
+| **Color**   | 🔴🔵 Different colored objects stand out |
+| **Size**    | 📏 Larger objects draw attention first |
+| **Orientation** | ↗ A tilted line among vertical lines |
+| **Shape**   | ◼️ ⬤ A square among circles |
+
+. . .
+
+**Where is the red dot?**
+
+::: {.column width="30%"}
+![](img/preattentive1.png)
+::: 
+
+::: {.column width="30%"}
+![](img/preattentive2.png){.fragment}
+:::
+
+::: {.column width="30%"}
+![](img/preattentive3.png){.fragment}
+:::
+
+
+## Pre-Attentive vs. Attentive Processing
+
+| Feature  | Pre-Attentive | Attentive |
+|----------|--------------|----------|
+| **Speed** | Instant (<250 ms) | Slow, deliberate |
+| **Effort** | Unconscious | Requires focus |
+| **Example** | Spotting a red dot in a sea of gray | Solving a math problem |
+
+🧠 **Designing charts with pre-attentive features helps viewers understand data instantly!**
+
+. . .
+
+### Why Does This Matter for Data Visualization?
+
+- Viewers **process visuals before reading text**.
+- Using pre-attentive attributes can:
+  - **Direct focus** to key insights.
+  - **Reduce cognitive load** for interpretation.
+  - **Make data storytelling more effective**.
+
+💡 **Good data visualization = Less work for the brain!** 
+
+## Cleveland's three visual operations of pattern perception
+
+🎯 **Detection**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*Recognizing that a geometric object encodes a physical value.*
+
+🧩 **Assembly**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*Grouping detected graphical elements into patterns.*
+
+📏 <span style="font-weight: bold; color: orange">**Estimation**</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*Visually assessing the relative magnitude of two or more values.*<span style="color: orange"> (Focus of today!) </span>
+
+::: {.columns}
+
+::: {.column width="50%"}
+![](img/cleveland-book.jpg){style="width: 50%; display: block; margin: auto;"}
+:::
+
+::: {.column width="50%"}
+![](img/cleveland-paper.png){style="width: 52%; display: block; margin: auto;"}
+:::
+
+:::
+
+## Three levels of estimation
+| Level | Example |
+|----------|--------------|
+|1. Discrimination |X = Y X != Y|
+|2. Ranking |X < Y X > Y|
+|3. Ratioing |X / Y = ?|
+
+📏 **We want to get as far down this list as possible with efficiency and accuracy**
+
+## The most important measurement should exploit the highest ranked encoding possible
+
+![](img/rank-visual-cues.png)
+
+Source: Yau, N. (2013). Data Points: Visualization That Means Something. Wiley.
+
+## Let's start from the bottom of the list
+
+1. Position on a common scale
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. <span style = "color: orange">Color hue </span>
+
+## Introducing the coffee ratings dataset
+
+```{r}
+library(tidyverse)
+options(pillar.print_min = 20,
+        pillar.print_max = 100)
+# tuesdata <- tidytuesdayR::tt_load(2020, week = 28)
+# coffee_ratings <- tuesdata$coffee_ratings %>%
+#   filter(total_cup_points > 0, !is.na(country_of_origin))
+# write_csv(coffee_ratings, "data/coffee_ratings.csv")
+coffee_ratings <- readr::read_csv("data/coffee_ratings.csv")
+country_summary <- coffee_ratings %>%
+  mutate(country = fct_lump(country_of_origin, 18)) %>%
+  group_by(country) %>%
+  summarize(mean_rating = mean(total_cup_points, na.rm = TRUE),
+            n = n()) %>%
+  arrange(desc(mean_rating)) %>%
+  print()
+```
+
+## Use color hue to visualize average ratings
+
+*Easy: which has higher ratings, Kenya or Indonesia?*
+
+```{r fig.width=8}
+library(ggplot2)
+country_summary %>%
+  arrange(country) %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # color scheme is red to blue
+  scale_fill_viridis_c(option = "plasma") +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+
+## Use color hue to visualize average ratings
+
+*Hard: which has higher ratings, Indonesia or Costa Rica?*
+
+```{r fig.width=8}
+country_summary %>%
+  arrange(country) %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # color scheme is red to blue
+  scale_fill_viridis_c(option = "plasma") +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+
+## What about now?
+
+```{r fig.width=8}
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # color scheme is red to blue
+  scale_fill_viridis_c(option = "plasma") +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+Observation: alphabetical ordering of the categorical variable is almost never useful, re-rank as needed.
+
+## Move up one level to color saturation
+
+1. Position on a common scale
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. Area
+6. <span style = "color: orange">Volume <> Density <> Color saturation</span>
+7. Color hue 
+
+## Use color saturation to visualize average ratings
+
+```{r fig.width=7.5}
+country_summary %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # one color scheme by saturation
+  scale_fill_gradient(low = "white", high = "black", guide = NULL) +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+
+. . .
+
+<div style="position:absolute; top:50%; left:75%; transform:translateY(-50%);">
+No legend?
+
+No problem.
+
+Because color saturation has natural ordering.
+</div>
+
+## Color saturation is easier to quantify
+
+```{r fig.width=7}
+country_summary %>%
+  mutate(country = fct_reorder(country, n)) %>%
+  ggplot(aes(x = 100, y = country, fill = n)) +
+  geom_tile() +
+  # one color scheme by saturation
+  scale_fill_gradient(low = "white", high = "black", limits = c(0, NA),
+                      name = "# of coffee bean varieties") +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+. . .
+
+<div style="position:absolute; top:30%; left:75%; transform:translateY(-50%);">
+The ratio between Mexico and United States is...
+</div>
+
+. . . 
+
+<div style="position:absolute; top:50%; left:75%; transform:translateY(-50%);">
+2 or 3
+
+Moving down to the third level of estimation
+</div>
+
+## Move up one level to area
+
+1. Position on a common scale
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. <span style = "color: orange">Area</span>
+6. Volume <> Density <> Color saturation
+7. Color hue 
+
+## This is weird graph but still informative
+
+```{r}
+
+ggplot(country_summary,
+       aes(
+         x = 100,
+         y = 100,
+         size = n
+       )) +
+  geom_point(shape = 21,
+             fill = "black") +  # Bubble chart with outlined points
+  scale_size_area() +  # Scale size by area
+  facet_wrap( ~ country) +  # Create small multiples by country
+  labs(size = "Coffee bean varieties\n(scaled for area)") +
+  theme_void() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()) 
+
+```
+
+

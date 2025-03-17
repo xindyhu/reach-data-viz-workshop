@@ -1,2 +1,4 @@
-# reach-data-viz-workshop
-Data Visualization Workshop for members of the REACH center and GW EOH students
+
+# Data Visualization Workshop
+
+Data visualization workshop for members of the REACH center and GWSPH EOH students
