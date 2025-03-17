@@ -231,7 +231,7 @@ country_summary <- coffee_ratings %>%
 
 ## Use color hue to visualize average ratings
 
-*Easy: which has higher ratings, Kenya or Indonesia?*
+<span style="color: darkgreen">*Easy: which has higher ratings, Kenya or Indonesia?*</span>
 
 ```{r fig.width=8}
 library(ggplot2)
@@ -248,9 +248,32 @@ country_summary %>%
         axis.title.x = element_blank()) 
 ```
 
+<div style="position: absolute; top: 48%; left: 5%;">
+  <svg width="50" height="30">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+        <polygon points="0 0, 10 5, 0 10" fill="black" />
+      </marker>
+    </defs>
+    <line x1="0" y1="15" x2="40" y2="15" stroke="black" stroke-width="2" marker-end="url(#arrowhead)" />
+  </svg>
+</div>
+
+
+<div style="position: absolute; top: 52%; left: 5%;">
+  <svg width="50" height="30">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+        <polygon points="0 0, 10 5, 0 10" fill="black" />
+      </marker>
+    </defs>
+    <line x1="0" y1="15" x2="40" y2="15" stroke="black" stroke-width="2" marker-end="url(#arrowhead)" />
+  </svg>
+</div>
+
 ## Use color hue to visualize average ratings
 
-*Hard: which has higher ratings, Indonesia or Costa Rica?*
+<span style="color: red">*Hard: which has higher ratings, Indonesia or Costa Rica?*</span>
 
 ```{r fig.width=8}
 country_summary %>%
@@ -265,6 +288,29 @@ country_summary %>%
         axis.ticks.x = element_blank(),
         axis.title.x = element_blank()) 
 ```
+
+<div style="position: absolute; top: 52%; left: 5%;">
+  <svg width="50" height="30">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+        <polygon points="0 0, 10 5, 0 10" fill="black" />
+      </marker>
+    </defs>
+    <line x1="0" y1="15" x2="40" y2="15" stroke="black" stroke-width="2" marker-end="url(#arrowhead)" />
+  </svg>
+</div>
+
+
+<div style="position: absolute; top: 76%; left: 5%;">
+  <svg width="50" height="30">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+        <polygon points="0 0, 10 5, 0 10" fill="black" />
+      </marker>
+    </defs>
+    <line x1="0" y1="15" x2="40" y2="15" stroke="black" stroke-width="2" marker-end="url(#arrowhead)" />
+  </svg>
+</div>
 
 ## What about now?
 
@@ -383,4 +429,313 @@ ggplot(country_summary,
 
 ```
 
+## Move up one level to angle
+
+1. Position on a common scale
+2. Position on non-aligned scales
+3. Length
+4. <span style = "color: orange">Angle</span>
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+
+## Use angle to visualize coffee bean varieties
+
+```{r}
+max_n <- max(country_summary$n)  # Find the maximum n
+
+country_summary %>%
+  mutate(country = fct_reorder(country, -n)) %>%
+  select(country, n) %>%
+  expand_grid(x = c(1,2)) %>%
+  mutate(y = x * n) %>%  # Scale y so max(n) reaches vertical
+  arrange(desc(n)) %>%
+  ggplot(aes(x = x, y = y, group = country)) +
+  geom_line(color = "black", linewidth = 1.5)+
+  facet_wrap(~ country) +
+  theme_void() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()) 
+
+```
+## Pie chart uses angle to encode quantitative information
+
+. . .  
+
+::: {.columns}
+
+::: {.column width="50%"}
+
+<span style = "color: red">Don't do this! </span>
+
+```{r fig.height=10}
+pie(country_summary$n,
+    labels = country_summary$country,
+    col = rainbow(nrow(country_summary)))
+```
+
+:::
+
+::: {.column width="50%"}
+
+<span style = "color: red">Or this! </span>
+```{r fig.height=10}
+pie(country_summary$mean_rating[1:5],
+    labels = country_summary$country[1:5],
+    col = rainbow(5))
+```
+
+:::
+
+:::
+
+## Pie chart uses angle to encode quantitative information
+
+This is fine
+
+```{r}
+coffee_ratings %>% 
+  filter(!is.na(processing_method)) %>%
+  group_by(processing_method) %>%
+  summarize(n = n()) %>%
+  ggplot(aes(x="", y=n, fill=processing_method)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  theme_void() # remove background, grid, numeric labels
+```
+For categorical data, no more than 6 colors is best.
+
+(Source: [European Environment Agency](https://www.eea.europa.eu/data-and-maps/daviz/learn-more/chart-dos-and-donts))
+
+## We are so close!
+
+::: {.column width="40%"}
+1. Position on a common scale
+2. Position on non-aligned scales
+3. <span style = "color: orange">Length</span>
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+:::
+
+::: {.column width="60%"}
+```{r fig.height=10}
+set.seed(42)
+country_summary %>%
+  mutate(noise = runif(19, 0, 5), mean_rating = mean_rating + noise) %>%
+  # Plot using geom_rect
+  ggplot(aes(y = reorder(country, -mean_rating))) +
+  geom_rect(
+    aes(
+      xmin = noise,
+      xmax = mean_rating,
+      ymin = as.numeric(factor(country)) - 0.4,
+      ymax = as.numeric(factor(country)) + 0.4
+    ),
+    fill = "skyblue",
+    color = "black"
+  ) +
+  theme_minimal(base_size = 22) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+. . .
+
+<div style="position:absolute; top:75%; left:0%; 
+transform:translateY(-50%); color:orange">
+Wait, I thought there is some difference...
+</div>
+
+## The start-at-zero rule
+
+:::{.column width="50%"}
+```{r fig.width=10, fig.height=10}
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # color scheme is red to blue
+  scale_fill_viridis_c(option = "plasma") +
+  theme_minimal(base_size = 22) +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+:::
+
+
+::: {.column width="50%"}
+```{r fig.height=10}
+set.seed(42)
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(y = country)) +
+  geom_rect(
+    aes(
+      xmin = 0,
+      xmax = mean_rating,
+      ymin = as.numeric(factor(country)) - 0.4,
+      ymax = as.numeric(factor(country)) + 0.4
+    ),
+    fill = "skyblue",
+    color = "black"
+  ) +
+  theme_minimal(base_size = 22) +
+  coord_cartesian(xlim = c(80, 86)) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+
+## **How to Lie with Statistics (1954)**
+
+* Huff argues that truncating the y-axis can exaggerate differences and mislead the viewer.
+* It creates a false impression of dramatic change where the actual variation is small.
+
+. . .
+
+![](img/lie_with_stat.png)
+
+## **The Visual Display of Quantitative Information (1983)**
+
+* Tufte prioritizes data density and the detection of subtle patterns.
+* He argues that starting at zero can waste valuable space, obscuring meaningful variations.
+
+. . .
+
+::: {.column width="45%"}
+**Combined MMR vaccination rate, 1994/95 to 2014/15, England**
+
+Vaccination levels are consistently high over the last 20 years. So there’s nothing to worry about, right?
+
+![](img/mmr-starts-from-0.png)
+:::
+
+
+::: {.column width="50%"}
+**Take another look, axis doesn't start at zero**
+
+An optional break symbol that can help draw attention to the fact axis doesn’t start at zero.
+Swap from a “don’t worry” version to a “there is still work to be done” version.
+
+![](img/mmr-not-from-zero.png)
+:::
+
+## Position, but not a common scale
+
+::: {.column width="40%"}
+1. Position on a common scale
+2. <span style = "color: orange">Position on non-aligned scales</span>
+3. Length
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+:::
+
+::: {.column width="60%"}
+```{r fig.height=10.5, fig.width=12}
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(x = mean_rating, y = 1)) +
+  # add a horizontal line at y = 1
+  geom_hline(yintercept = 1) +
+  geom_point(color = "black", size = 3) +
+  facet_wrap(~country) +
+  coord_cartesian(xlim = c(80, 86)) +
+  theme_minimal(base_size = 22) +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+## Position, and a common scale
+
+::: {.column width="40%"}
+1. <span style = "color: orange">Position on a common scale</span>
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+:::
+
+::: {.column width="60%"}
+```{r fig.height=10.5}
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(x = mean_rating, y = country)) +
+  # add a horizontal line at y = 1
+  geom_hline(yintercept = 1) +
+  geom_point(color = "black", size = 3) +
+  coord_cartesian(xlim = c(80, 86)) +
+  theme_minimal(base_size = 22) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+## Position, and a common scale
+
+::: {.column width="40%"}
+1. <span style = "color: orange">Position on a common scale</span>
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+:::
+
+::: {.column width="60%"}
+```{r fig.height=10.5}
+country_summary %>%
+  ggplot(aes(x = mean_rating, y = country)) +
+  # add a horizontal line at y = 1
+  geom_hline(yintercept = 1) +
+  geom_point(color = "black", size = 3) +
+  coord_cartesian(xlim = c(80, 86)) +
+  theme_minimal(base_size = 22) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+
+<div style="position:absolute; top:75%; left:0%; 
+transform:translateY(-50%); color:red">
+Re-ranking categorical variables still matters!
+</div>
+
+## Climate stripes: a discussion
+
+Climate stripes are a popular visualization of global temperature trends. They use color hue to represent temperature anomalies.
+
+![](img/climate_stripes.png){style="height: 400px; width: 2000px"}
+<div style="text-align: right; font-size: 22px">Source: Ed Hawkins/showyourstripes.info.</div>
+
+Discuss:
+
+* What are the strengths and weaknesses of the climate stripes visualization?
+* Why do you think the climate stripes have become so popular?
+* How does the emotional impact of the visualization affect its effectiveness?
+* When is it ok to sacrifice data precision for impact?
+
+
+## Outline for today
+1. How humans see data
+
+<span style="font-weight: bold; color: orange">2. Introduction to R Shiny</span>
+
+3. Introduction to Shiny Assistant
+
+4. Next-steps
 
