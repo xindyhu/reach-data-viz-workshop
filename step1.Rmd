@@ -1,0 +1,196 @@
+---
+title: "Coffee Ratings Analysis"
+author: "Workshop Step1"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Loading Libraries and Data
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(maps)
+library(fmsb)
+library(viridis)
+coffee_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
+```
+
+## Data Cleaning and Preparation
+
+```{r}
+coffee_clean <- coffee_ratings %>%
+  filter(!is.na(total_cup_points), !is.na(country_of_origin)) %>%
+  mutate(
+    quality_category = case_when(
+      total_cup_points >= 90 ~ "Outstanding",
+      total_cup_points >= 85 ~ "Excellent",
+      total_cup_points >= 80 ~ "Very Good",
+      total_cup_points >= 75 ~ "Good",
+      TRUE ~ "Fair"
+    ),
+    processing_method = ifelse(is.na(processing_method), "Unknown", processing_method),
+    processing_method = fct_lump(processing_method, n = 5)
+  )
+
+country_summary <- coffee_clean %>%
+  group_by(country_of_origin) %>%
+  summarise(
+    mean_score = mean(total_cup_points, na.rm = TRUE),
+    count = n(),
+    median_score = median(total_cup_points, na.rm = TRUE)
+  ) %>%
+  filter(count >= 5) %>%
+  arrange(desc(mean_score))
+```
+```{r}
+head(country_summary)
+```
+
+## 1. Bar Chart: Average Coffee Ratings by Country
+
+```{r bar-chart, fig.width=10, fig.height=6}
+ggplot(top_n(country_summary, 15, mean_score), 
+       aes(x = reorder(country_of_origin, mean_score), y = mean_score, fill = mean_score)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = round(mean_score, 1)), hjust = -0.2, size = 3.5) +
+  scale_fill_viridis_c() +
+  coord_flip() +
+  labs(
+    title = "Top 15 Countries by Average Coffee Rating",
+    subtitle = "Countries with at least 5 samples",
+    x = "",
+    y = "Average Total Cup Points",
+    fill = "Average Score"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom"
+  )
+```
+
+## 2. Dot Plot: Coffee Ratings by Processing Method
+
+```{r dot-plot, fig.width=10, fig.height=6}
+valid_methods <- coffee_clean %>%
+  count(processing_method) %>%
+  filter(n >= 10) %>%
+  pull(processing_method)
+
+coffee_clean %>%
+  filter(processing_method %in% valid_methods) %>%
+  group_by(processing_method) %>%
+  mutate(avg_score = mean(total_cup_points)) %>%
+  ungroup() %>%
+  ggplot(aes(x = total_cup_points, y = reorder(processing_method, avg_score))) +
+  geom_boxplot(width = 0.5, fill = "lightblue", alpha = 0.5, outlier.shape = NA) +
+  geom_jitter(alpha = 0.6, height = 0.2, width = 0, color = "darkblue", size = 1.5) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "red") +
+  labs(
+    title = "Coffee Ratings by Processing Method",
+    subtitle = "Methods with 10+ samples, ordered by average score (red diamond)",
+    x = "Total Cup Points",
+    y = ""
+  )
+```
+
+## 3. Radar Chart: Sensory Profiles of Top Coffees
+
+```{r radar-chart, fig.width=10, fig.height=8}
+
+top_coffees <- coffee_clean %>%
+  group_by(country_of_origin) %>%
+  arrange(desc(total_cup_points)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(country_of_origin, aroma, flavor, aftertaste, acidity, body, balance, uniformity, clean_cup, sweetness) %>%
+  filter(complete.cases(.)) %>%
+  slice(1:6)
+
+radar_data <- top_coffees %>%
+  column_to_rownames(var = "country_of_origin") 
+radar_data <- rbind(
+  rep(10, ncol(radar_data)),  
+  rep(0, ncol(radar_data)),   
+  radar_data
+)
+radar_colors <- viridis(nrow(radar_data) - 2)
+par(mar = c(1, 1, 3, 1))
+radarchart(
+  radar_data,
+  pcol = radar_colors,
+  pfcol = adjustcolor(radar_colors, alpha.f = 0.3),
+  plwd = 2,
+  cglcol = "grey",
+  cglty = 1,
+  axislabcol = "grey30",
+  vlcex = 0.8,
+  title = "Sensory Profiles of Top Coffees by Country"
+)
+
+legend(
+  "topright",
+  legend = rownames(radar_data)[3:nrow(radar_data)],
+  col = radar_colors,
+  lty = 1,
+  lwd = 2,
+  pch = 20,
+  bty = "n",
+  cex = 0.8
+)
+```
+
+## 4. World Map: Coffee Ratings by Country
+
+```{r}
+
+map_data <- country_summary
+world <- map_data("world")
+
+country_matching <- data.frame(
+  map_name = c("USA", "Ethiopia", "Papua New Guinea", "Tanzania", "Taiwan"),
+  data_name = c("United States", "Ethiopia", "Papua New Guinea", "Tanzania, United Republic Of", "Taiwan")
+)
+
+for (i in 1:nrow(country_matching)) {
+  map_data$country_of_origin[map_data$country_of_origin == country_matching$data_name[i]] <- country_matching$map_name[i]
+}
+
+ggplot() +
+  geom_map(
+    data = world, map = world,
+    aes(long, lat, map_id = region),
+    color = "white", fill = "lightgray", size = 0.1
+  ) +
+  geom_map(
+    data = map_data, map = world,
+    aes(map_id = country_of_origin, fill = mean_score),
+    color = "white", size = 0.1
+  ) +
+  scale_fill_viridis_c(option = "plasma", direction = -1, 
+                      name = "Average Score",
+                      limits = c(min(map_data$mean_score), max(map_data$mean_score))) +
+  labs(
+    title = "Average Coffee Ratings by Country of Origin",
+    subtitle = "Countries with at least 5 samples in the dataset",
+    caption = "Source: Coffee Quality Institute"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "bottom"
+  )
+```
