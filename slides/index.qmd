@@ -53,6 +53,12 @@ execute:
 :::
 :::
 
+## Acknowledgements
+
+>Much of the content in this section is from  [John Rauser's talk](https://www.youtube.com/watch?v=fSgEeI2Xpdc) on YouTube and [JP Helveston's course](https://eda.seas.gwu.edu/2024-Fall/class/6-visualizing-information) on Exploratory Data Analysis
+
+>A special thanks to [Sayam Mukesh Palrecha](https://www.linkedin.com/in/sayampalrecha/), a Master of Science in Data Science candidate at GWU, class of 2026, for his invaluable assistance with preparing the R markdown and the R shiny code.
+
 ## Learning objectives
 * Understand the basics of data visualization
 * Learn how to create interactive data visualization using R Shiny
@@ -66,10 +72,6 @@ execute:
 3. Introduction to Shiny Assistant
 
 4. Next-steps
-
-## Acknowledgements
-
-Much of the content in this section is from  [John Rauser's talk](https://www.youtube.com/watch?v=fSgEeI2Xpdc) on YouTube and [JP Helveston's course](https://eda.seas.gwu.edu/2024-Fall/class/6-visualizing-information) on Exploratory Data Analysis
 
 ## Good data visualization is optimized for our <span style="font-weight: bold; color: orange">visual-memory system</span>
 
@@ -225,6 +227,7 @@ country_summary <- coffee_ratings %>%
             n = n()) %>%
   arrange(desc(mean_rating)) 
 glimpse(coffee_ratings)
+glimpse(country_summary)
 ```
 
 :::
@@ -461,16 +464,27 @@ ggplot(country_summary,
 ## Use angle to visualize coffee bean varieties
 
 ```{r}
-max_n <- max(country_summary$n)  # Find the maximum n
+# Normalize value so that the maximum value is represented by 90 degrees
 
+max_n <- max(country_summary$n)  
+min_n <- min(country_summary$n)
+
+# Function to convert value to angle in degrees
+value_to_angle <- function(x) {
+  return(scales::rescale(x, to = c(0, 89), from = c(min_n, max_n)))
+}
+
+# Plot
 country_summary %>%
-  mutate(country = fct_reorder(country, -n)) %>%
-  select(country, n) %>%
-  expand_grid(x = c(1,2)) %>%
-  mutate(y = x * n) %>%  # Scale y so max(n) reaches vertical
+  mutate(country = fct_reorder(country, -n),
+         angle = value_to_angle(n),
+         xend = cos(angle * pi / 180),
+         yend = sin(angle * pi / 180)) %>%
   arrange(desc(n)) %>%
-  ggplot(aes(x = x, y = y, group = country)) +
-  geom_line(color = "black", linewidth = 1.5)+
+  ggplot(aes(group = country)) +
+  geom_segment(aes(x = 0, y = 0, 
+                   xend = xend, yend = yend),
+                   color = "black", linewidth = 1.5)+
   facet_wrap(~ country) +
   theme_void() +
   theme(axis.text.x = element_blank(),
@@ -778,7 +792,7 @@ From this
 
 :::{.column width="50%"}
 To this
-<iframe src="https://sunderlandlab.github.io/pfas_interactive_maps/PFAS_EJ_interactive_map.html" width="100%" height="500px"></iframe>
+<iframe src="https://sunderlandlab.github.io/pfas_interactive_maps/PFAS_EJ_interactive_map.html" width="100%" height="500px" style="zoom: 1.5;"></iframe>
 <span style="font-size: 22px">(Liddie et al, 2023)</span>
 :::
 :::
@@ -791,7 +805,7 @@ A Shiny app comprises two main components:
 
 ## Your first shiny app
 
-<iframe src=https://gallery.shinyapps.io/084-single-file/?_gl=1*pmfy4b*_ga*ODk5MzUzNTczLjE3MzUzNDQ0ODQ.*_ga_2C0WZ1JHG0*MTc0MjM5OTM0My4xOC4xLjE3NDI0MDEyMzAuMC4wLjA.html" width="90%" height="90%"></iframe>
+<iframe src=https://gallery.shinyapps.io/084-single-file/?_gl=1*pmfy4b*_ga*ODk5MzUzNTczLjE3MzUzNDQ0ODQ.*_ga_2C0WZ1JHG0*MTc0MjM5OTM0My4xOC4xLjE3NDI0MDEyMzAuMC4wLjA.html" width="100%" height="90%" style="zoom: 1.5;"></iframe>
 
 ## Reactivity in Shiny
 
@@ -991,15 +1005,59 @@ While functions and reactives help accomplish similar goals in terms of not-repe
 
 * However reactive expressions are lazy, they only get executed when their input changes.
 
+## Switch to RStudio!
+![](img/congratulations.webp)
 
 # Outline for today
-1. How humans see data
 
-2. Introduction to R Shiny
+1.  How humans see data
 
-<span style="font-weight: bold; color: orange">3. Introduction to Shiny Assistant</span>
+2.  Introduction to R Shiny
 
-4. Next-steps
+[3. Introduction to Shiny Assistant]{style="font-weight: bold; color: orange"}
+
+4.  Next-steps
+
+## What is Shiny Assistant?
+
+<https://gallery.shinyapps.io/assistant/>
+
+<iframe src="https://gallery.shinyapps.io/assistant/" width="100%" height="1000px" style="zoom: 1.5;">
+
+</iframe>
+
+## Use Shiny Assistant to recreate the shiny app we just saw
+**`Prompt`**
+
+::: {style="text-align: left; font-size: 22px"}
+Use the tidytuesday coffee ratings dataset, located at <https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv> to develop a dashboard.
+
+The title should be "Coffee Data Dashboard", use the shinydashboard format.
+
+On the left, there are three inputs, a drop down menu for species, a checkbox for quality category, and a multiselect box for country, pre-select "Ethiopia" and "India".
+
+On the right, there should be four plotly graphs. First one is the number of bean variety. Second is the average flavor profile shown in a radar chart. Third is a box plot showing coffee ratings by processing methods. Fourth is a choropleth map showing average coffee ratings by country.
+:::
+<iframe src="https://gallery.shinyapps.io/assistant/" width="100%" height="500px" style="zoom: 1.5;">
+</iframe>
+
+
+## Your turn!
+
+💡 **Try one of these built-in datasets to explore with Shiny Assistant!**
+
+| Dataset | Description |
+|-------------------|-----------------------------------------------------|
+| **`mtcars`** 🚗 | Car performance data (mpg, cylinders, hp) |
+| **`iris`** 🌸 | Iris flower measurements (sepal, petal, species) |
+| **`diamonds`** 💎 | Diamond pricing (carat, cut, price, etc.) |
+| **`faithful`** 🌋 | Old Faithful geyser eruptions (duration, waiting time) |
+| **`airquality`** 🌍 | New York air quality data (Ozone, Temp, Wind) |
+| **`ToothGrowth`** 🦷 | Vitamin C & tooth growth in guinea pigs |
+
+🛠️ **Try it out yourself!**
+
+💬 **What did you learn? What worked well? Any surprises?**
 
 # Outline for today
 1. How humans see data
@@ -1010,8 +1068,23 @@ While functions and reactives help accomplish similar goals in terms of not-repe
 
 <span style="font-weight: bold; color: orange">4. Next-steps</span>
 
+## You can deploy an app for free on **`shinyapps.io`**
+
+Follow [this guide](https://shiny.posit.co/r/articles/share/shinyapps/)
+
+1. Create a shinyapps.io account
+2. Open your tokens, click "Show", copy the code
+3. Run the code in RStudio
+4. Deploy your app:
+
+```{r eval = FALSE, echo = TRUE}
+library(rsconnect)
+deployApp()
+```
+
+
 ## How much time do you have?
-- **10min**: Print out this [Shiny for R cheatsheet](https://shiny.posit.co/r/articles/start/cheatsheet/)
+- **10 min**: Print out this [Shiny for R cheatsheet](https://shiny.posit.co/r/articles/start/cheatsheet/)
 - **2.5 hrs**: Follow this [Posit tutorial](https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/)
 - **1 week**: If you are an EOH student, participate in the `2025 EOH Data Visualization Competition`!
 - **6 weeks**: Sign-up for `PUBH6199 Visualizing Data with R` this summer!
@@ -1042,6 +1115,10 @@ While functions and reactives help accomplish similar goals in terms of not-repe
 ![](img/eoh-data-viz-comp.png){style="height: 90%; display: block; margin: auto;"}
 :::
 :::
+
+## REACH Climate and Health Research Fellowship
+
+![](img/reach_fellow_flyer.png){style="display: block; margin: auto;"}
 
 ## PUBH6199 Visualizing Data with R
 ![](img/pubh6199-flyer.png){style="width: 100%; display: block; margin: auto;"}

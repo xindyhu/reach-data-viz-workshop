@@ -428,6 +428,15 @@ Dr.&nbsp;Xindi (Cindy) Hu, Assistant Professor at GWSPH
 </ul>
 </div></div>
 </section>
+<section id="acknowledgements" class="slide level2">
+<h2>Acknowledgements</h2>
+<blockquote>
+<p>Much of the content in this section is from <a href="https://www.youtube.com/watch?v=fSgEeI2Xpdc">John Rauser’s talk</a> on YouTube and <a href="https://eda.seas.gwu.edu/2024-Fall/class/6-visualizing-information">JP Helveston’s course</a> on Exploratory Data Analysis</p>
+</blockquote>
+<blockquote>
+<p>A special thanks to <a href="https://www.linkedin.com/in/sayampalrecha/">Sayam Mukesh Palrecha</a>, a Master of Science in Data Science candidate at GWU, class of 2026, for his invaluable assistance with preparing the R markdown and the R shiny code.</p>
+</blockquote>
+</section>
 <section id="learning-objectives" class="slide level2">
 <h2>Learning objectives</h2>
 <ul>
@@ -445,10 +454,6 @@ Dr.&nbsp;Xindi (Cindy) Hu, Assistant Professor at GWSPH
 <li><p>Introduction to Shiny Assistant</p></li>
 <li><p>Next-steps</p></li>
 </ol>
-</section>
-<section id="acknowledgements" class="slide level2">
-<h2>Acknowledgements</h2>
-<p>Much of the content in this section is from <a href="https://www.youtube.com/watch?v=fSgEeI2Xpdc">John Rauser’s talk</a> on YouTube and <a href="https://eda.seas.gwu.edu/2024-Fall/class/6-visualizing-information">JP Helveston’s course</a> on Exploratory Data Analysis</p>
 </section>
 <section id="good-data-visualization-is-optimized-for-our-visual-memory-system" class="slide level2">
 <h2>Good data visualization is optimized for our <span style="font-weight: bold; color: orange">visual-memory system</span></h2>
@@ -675,6 +680,13 @@ $ unit_of_measurement   &lt;chr&gt; "m", "m", "m", "m", "m", "m", "m", "m", "m",
 $ altitude_low_meters   &lt;dbl&gt; 1950.0, 1950.0, 1600.0, 1800.0, 1950.0, NA, NA, …
 $ altitude_high_meters  &lt;dbl&gt; 2200.0, 2200.0, 1800.0, 2200.0, 2200.0, NA, NA, …
 $ altitude_mean_meters  &lt;dbl&gt; 2075.0, 2075.0, 1700.0, 2000.0, 2075.0, NA, NA, …</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 19
+Columns: 3
+$ country     &lt;fct&gt; "Ethiopia", "Kenya", "Uganda", "Colombia", "El Salvador", …
+$ mean_rating &lt;dbl&gt; 85.48409, 84.30960, 83.45194, 83.10656, 83.05286, 82.92750…
+$ n           &lt;int&gt; 44, 25, 36, 183, 21, 16, 51, 32, 20, 132, 40, 75, 181, 73,…</code></pre>
 </div>
 </div>
 </div><div class="column" style="width:20%;">
@@ -1019,7 +1031,7 @@ Source: Ed Hawkins/showyourstripes.info.
 <p>From this <img data-src="img/ucmr.png" style="width: 100%; display: block; margin: auto;"></p>
 <p><span style="font-size: 22px">(Hu et al, 2016)</span></p>
 </div><div class="column" style="width:50%;">
-<p>To this <iframe src="https://sunderlandlab.github.io/pfas_interactive_maps/PFAS_EJ_interactive_map.html" width="100%" height="500px"></iframe> <span style="font-size: 22px">(Liddie et al, 2023)</span></p>
+<p>To this <iframe src="https://sunderlandlab.github.io/pfas_interactive_maps/PFAS_EJ_interactive_map.html" width="100%" height="500px" style="zoom: 1.5;"></iframe> <span style="font-size: 22px">(Liddie et al, 2023)</span></p>
 </div></div>
 </div>
 </section>
@@ -1030,7 +1042,7 @@ Source: Ed Hawkins/showyourstripes.info.
 <img data-src="img/shiny-anatomy.png" style="width: 100%; display: block; margin: auto;" class="r-stretch"></section>
 <section id="your-first-shiny-app" class="slide level2">
 <h2>Your first shiny app</h2>
-<iframe src="https://gallery.shinyapps.io/084-single-file/?_gl=1*pmfy4b*_ga*ODk5MzUzNTczLjE3MzUzNDQ0ODQ.*_ga_2C0WZ1JHG0*MTc0MjM5OTM0My4xOC4xLjE3NDI0MDEyMzAuMC4wLjA.html&quot;" width="90%" height="90%">
+<iframe src="https://gallery.shinyapps.io/084-single-file/?_gl=1*pmfy4b*_ga*ODk5MzUzNTczLjE3MzUzNDQ0ODQ.*_ga_2C0WZ1JHG0*MTc0MjM5OTM0My4xOC4xLjE3NDI0MDEyMzAuMC4wLjA.html&quot;" width="100%" height="90%" style="zoom: 1.5;">
 </iframe>
 </section>
 <section id="reactivity-in-shiny" class="slide level2">
@@ -1057,24 +1069,24 @@ Source: Ed Hawkins/showyourstripes.info.
 <section id="back-to-the-toy-example" class="slide level2">
 <h2>Back to the toy example</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" data-code-line-numbers="5-8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="co"># Global variables can go here</span></span>
-<span id="cb2-2"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb2-3"><a href=""></a></span>
-<span id="cb2-4"><a href=""></a><span class="co"># Define the UI</span></span>
-<span id="cb2-5"><a href=""></a>ui <span class="ot">&lt;-</span> <span class="fu">bootstrapPage</span>(</span>
-<span id="cb2-6"><a href=""></a>  <span class="fu">numericInput</span>(<span class="at">inputId =</span> <span class="st">'n'</span>, <span class="at">label =</span> <span class="st">'Number of obs'</span>, <span class="at">value =</span> n),</span>
-<span id="cb2-7"><a href=""></a>  <span class="fu">plotOutput</span>(<span class="at">outputId =</span> <span class="st">'myplot'</span>)</span>
-<span id="cb2-8"><a href=""></a>)</span>
-<span id="cb2-9"><a href=""></a></span>
-<span id="cb2-10"><a href=""></a><span class="co"># Define the server code</span></span>
-<span id="cb2-11"><a href=""></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output) {</span>
-<span id="cb2-12"><a href=""></a>  output<span class="sc">$</span>myplot <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
-<span id="cb2-13"><a href=""></a>    <span class="fu">hist</span>(<span class="fu">runif</span>(input<span class="sc">$</span>n))</span>
-<span id="cb2-14"><a href=""></a>  })</span>
-<span id="cb2-15"><a href=""></a>}</span>
-<span id="cb2-16"><a href=""></a></span>
-<span id="cb2-17"><a href=""></a><span class="co"># Return a Shiny app object</span></span>
-<span id="cb2-18"><a href=""></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3" data-code-line-numbers="5-8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="co"># Global variables can go here</span></span>
+<span id="cb3-2"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb3-3"><a href=""></a></span>
+<span id="cb3-4"><a href=""></a><span class="co"># Define the UI</span></span>
+<span id="cb3-5"><a href=""></a>ui <span class="ot">&lt;-</span> <span class="fu">bootstrapPage</span>(</span>
+<span id="cb3-6"><a href=""></a>  <span class="fu">numericInput</span>(<span class="at">inputId =</span> <span class="st">'n'</span>, <span class="at">label =</span> <span class="st">'Number of obs'</span>, <span class="at">value =</span> n),</span>
+<span id="cb3-7"><a href=""></a>  <span class="fu">plotOutput</span>(<span class="at">outputId =</span> <span class="st">'myplot'</span>)</span>
+<span id="cb3-8"><a href=""></a>)</span>
+<span id="cb3-9"><a href=""></a></span>
+<span id="cb3-10"><a href=""></a><span class="co"># Define the server code</span></span>
+<span id="cb3-11"><a href=""></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output) {</span>
+<span id="cb3-12"><a href=""></a>  output<span class="sc">$</span>myplot <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
+<span id="cb3-13"><a href=""></a>    <span class="fu">hist</span>(<span class="fu">runif</span>(input<span class="sc">$</span>n))</span>
+<span id="cb3-14"><a href=""></a>  })</span>
+<span id="cb3-15"><a href=""></a>}</span>
+<span id="cb3-16"><a href=""></a></span>
+<span id="cb3-17"><a href=""></a><span class="co"># Return a Shiny app object</span></span>
+<span id="cb3-18"><a href=""></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="columns">
 <div class="column" style="width:50%;">
@@ -1099,24 +1111,24 @@ Source: Ed Hawkins/showyourstripes.info.
 <section id="back-to-the-toy-example-1" class="slide level2">
 <h2>Back to the toy example</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3" data-code-line-numbers="11-14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="co"># Global variables can go here</span></span>
-<span id="cb3-2"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb3-3"><a href=""></a></span>
-<span id="cb3-4"><a href=""></a><span class="co"># Define the UI</span></span>
-<span id="cb3-5"><a href=""></a>ui <span class="ot">&lt;-</span> <span class="fu">bootstrapPage</span>(</span>
-<span id="cb3-6"><a href=""></a>  <span class="fu">numericInput</span>(<span class="at">inputId =</span> <span class="st">'n'</span>, <span class="at">label =</span> <span class="st">'Number of obs'</span>, <span class="at">value =</span> n),</span>
-<span id="cb3-7"><a href=""></a>  <span class="fu">plotOutput</span>(<span class="at">outputId =</span> <span class="st">'myplot'</span>)</span>
-<span id="cb3-8"><a href=""></a>)</span>
-<span id="cb3-9"><a href=""></a></span>
-<span id="cb3-10"><a href=""></a><span class="co"># Define the server code</span></span>
-<span id="cb3-11"><a href=""></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output) {</span>
-<span id="cb3-12"><a href=""></a>  output<span class="sc">$</span>myplot <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
-<span id="cb3-13"><a href=""></a>    <span class="fu">hist</span>(<span class="fu">runif</span>(input<span class="sc">$</span>n))</span>
-<span id="cb3-14"><a href=""></a>  })</span>
-<span id="cb3-15"><a href=""></a>}</span>
-<span id="cb3-16"><a href=""></a></span>
-<span id="cb3-17"><a href=""></a><span class="co"># Return a Shiny app object</span></span>
-<span id="cb3-18"><a href=""></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4" data-code-line-numbers="11-14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># Global variables can go here</span></span>
+<span id="cb4-2"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb4-3"><a href=""></a></span>
+<span id="cb4-4"><a href=""></a><span class="co"># Define the UI</span></span>
+<span id="cb4-5"><a href=""></a>ui <span class="ot">&lt;-</span> <span class="fu">bootstrapPage</span>(</span>
+<span id="cb4-6"><a href=""></a>  <span class="fu">numericInput</span>(<span class="at">inputId =</span> <span class="st">'n'</span>, <span class="at">label =</span> <span class="st">'Number of obs'</span>, <span class="at">value =</span> n),</span>
+<span id="cb4-7"><a href=""></a>  <span class="fu">plotOutput</span>(<span class="at">outputId =</span> <span class="st">'myplot'</span>)</span>
+<span id="cb4-8"><a href=""></a>)</span>
+<span id="cb4-9"><a href=""></a></span>
+<span id="cb4-10"><a href=""></a><span class="co"># Define the server code</span></span>
+<span id="cb4-11"><a href=""></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output) {</span>
+<span id="cb4-12"><a href=""></a>  output<span class="sc">$</span>myplot <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
+<span id="cb4-13"><a href=""></a>    <span class="fu">hist</span>(<span class="fu">runif</span>(input<span class="sc">$</span>n))</span>
+<span id="cb4-14"><a href=""></a>  })</span>
+<span id="cb4-15"><a href=""></a>}</span>
+<span id="cb4-16"><a href=""></a></span>
+<span id="cb4-17"><a href=""></a><span class="co"># Return a Shiny app object</span></span>
+<span id="cb4-18"><a href=""></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li><strong><code>output$myplot &lt;- renderPlot({...})</code></strong>
@@ -1157,12 +1169,12 @@ Source: Ed Hawkins/showyourstripes.info.
 <p><img data-src="img/reactive-input.png"></p>
 </div><div class="column" style="width:90%;">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="fu">selectInput</span>(</span>
-<span id="cb4-2"><a href=""></a>  <span class="at">inputId =</span> <span class="st">"country_filter"</span>,</span>
-<span id="cb4-3"><a href=""></a>  <span class="at">label =</span> <span class="st">"Select country:"</span>,</span>
-<span id="cb4-4"><a href=""></a>  <span class="at">choices =</span> <span class="fu">c</span>(<span class="st">"All"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(coffee_clean<span class="sc">$</span>country_of_origin))),</span>
-<span id="cb4-5"><a href=""></a>  <span class="at">selected =</span> <span class="st">"All"</span></span>
-<span id="cb4-6"><a href=""></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="fu">selectInput</span>(</span>
+<span id="cb5-2"><a href=""></a>  <span class="at">inputId =</span> <span class="st">"country_filter"</span>,</span>
+<span id="cb5-3"><a href=""></a>  <span class="at">label =</span> <span class="st">"Select country:"</span>,</span>
+<span id="cb5-4"><a href=""></a>  <span class="at">choices =</span> <span class="fu">c</span>(<span class="st">"All"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(coffee_clean<span class="sc">$</span>country_of_origin))),</span>
+<span id="cb5-5"><a href=""></a>  <span class="at">selected =</span> <span class="st">"All"</span></span>
+<span id="cb5-6"><a href=""></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li>We define an <strong><code>inputId()</code></strong> that we’ll use to refer to the input element to later in the app</li>
@@ -1178,13 +1190,13 @@ Source: Ed Hawkins/showyourstripes.info.
 <p><img data-src="img/reactive-expression.png"></p>
 </div><div class="column" style="width:90%;">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>filtered_data <span class="ot">&lt;-</span> <span class="fu">reactive</span>({</span>
-<span id="cb5-2"><a href=""></a>  data <span class="ot">&lt;-</span> coffee_clean</span>
-<span id="cb5-3"><a href=""></a>  <span class="cf">if</span> (input<span class="sc">$</span>country_filter <span class="sc">!=</span> <span class="st">"All"</span>) {</span>
-<span id="cb5-4"><a href=""></a>    data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(country_of_origin <span class="sc">==</span> input<span class="sc">$</span>country_filter)</span>
-<span id="cb5-5"><a href=""></a>  }</span>
-<span id="cb5-6"><a href=""></a>  <span class="fu">return</span>(data)</span>
-<span id="cb5-7"><a href=""></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a>filtered_data <span class="ot">&lt;-</span> <span class="fu">reactive</span>({</span>
+<span id="cb6-2"><a href=""></a>  data <span class="ot">&lt;-</span> coffee_clean</span>
+<span id="cb6-3"><a href=""></a>  <span class="cf">if</span> (input<span class="sc">$</span>country_filter <span class="sc">!=</span> <span class="st">"All"</span>) {</span>
+<span id="cb6-4"><a href=""></a>    data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(country_of_origin <span class="sc">==</span> input<span class="sc">$</span>country_filter)</span>
+<span id="cb6-5"><a href=""></a>  }</span>
+<span id="cb6-6"><a href=""></a>  <span class="fu">return</span>(data)</span>
+<span id="cb6-7"><a href=""></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li>This creates a <strong>cached expression</strong> that knows it is out of date when its input changes</li>
@@ -1200,12 +1212,12 @@ Source: Ed Hawkins/showyourstripes.info.
 <p><img data-src="img/reactive-output.png"></p>
 </div><div class="column" style="width:90%;">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a>  output<span class="sc">$</span>bean_variety <span class="ot">&lt;-</span> <span class="fu">renderPlotly</span>({</span>
-<span id="cb6-2"><a href=""></a>    <span class="fu">req</span>(<span class="fu">nrow</span>(<span class="fu">filtered_data</span>()) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
-<span id="cb6-3"><a href=""></a>    p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">filtered_data</span>(), <span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> <span class="fu">reorder</span>(variety, n), <span class="at">fill =</span> n)) <span class="sc">+</span></span>
-<span id="cb6-4"><a href=""></a>      <span class="fu">geom_col</span>()</span>
-<span id="cb6-5"><a href=""></a>    <span class="fu">ggplotly</span>(p)</span>
-<span id="cb6-6"><a href=""></a>  })</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>  output<span class="sc">$</span>bean_variety <span class="ot">&lt;-</span> <span class="fu">renderPlotly</span>({</span>
+<span id="cb7-2"><a href=""></a>    <span class="fu">req</span>(<span class="fu">nrow</span>(<span class="fu">filtered_data</span>()) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb7-3"><a href=""></a>    p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">filtered_data</span>(), <span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> <span class="fu">reorder</span>(variety, n), <span class="at">fill =</span> n)) <span class="sc">+</span></span>
+<span id="cb7-4"><a href=""></a>      <span class="fu">geom_col</span>()</span>
+<span id="cb7-5"><a href=""></a>    <span class="fu">ggplotly</span>(p)</span>
+<span id="cb7-6"><a href=""></a>  })</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li>This creates a plot using the <strong><code>reactive expression</code></strong> we defined earlier</li>
@@ -1221,7 +1233,12 @@ Source: Ed Hawkins/showyourstripes.info.
 <li><p>However reactive expressions are lazy, they only get executed when their input changes.</p></li>
 </ul>
 </div>
-</section></section>
+</section>
+<section id="switch-to-rstudio" class="slide level2">
+<h2>Switch to RStudio!</h2>
+
+<img data-src="img/congratulations.webp" class="r-stretch"></section></section>
+<section>
 <section id="outline-for-today-2" class="title-slide slide level1">
 <h1>Outline for today</h1>
 <ol type="1">
@@ -1233,7 +1250,68 @@ Source: Ed Hawkins/showyourstripes.info.
 <li>Next-steps</li>
 </ol>
 </section>
-
+<section id="what-is-shiny-assistant" class="slide level2">
+<h2>What is Shiny Assistant?</h2>
+<p><a href="https://gallery.shinyapps.io/assistant/" class="uri">https://gallery.shinyapps.io/assistant/</a></p>
+<iframe src="https://gallery.shinyapps.io/assistant/" width="100%" height="1000px" style="zoom: 1.5;">
+</iframe>
+</section>
+<section id="use-shiny-assistant-to-recreate-the-shiny-app-we-just-saw" class="slide level2">
+<h2>Use Shiny Assistant to recreate the shiny app we just saw</h2>
+<p><strong><code>Prompt</code></strong></p>
+<div style="text-align: left; font-size: 22px">
+<p>Use the tidytuesday coffee ratings dataset, located at <a href="https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv" class="uri">https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv</a> to develop a dashboard.</p>
+<p>The title should be “Coffee Data Dashboard”, use the shinydashboard format.</p>
+<p>On the left, there are three inputs, a drop down menu for species, a checkbox for quality category, and a multiselect box for country, pre-select “Ethiopia” and “India”.</p>
+<p>On the right, there should be four plotly graphs. First one is the number of bean variety. Second is the average flavor profile shown in a radar chart. Third is a box plot showing coffee ratings by processing methods. Fourth is a choropleth map showing average coffee ratings by country.</p>
+</div>
+<iframe src="https://gallery.shinyapps.io/assistant/" width="100%" height="500px" style="zoom: 1.5;">
+</iframe>
+</section>
+<section id="your-turn" class="slide level2">
+<h2>Your turn!</h2>
+<p>💡 <strong>Try one of these built-in datasets to explore with Shiny Assistant!</strong></p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 26%">
+<col style="width: 73%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Dataset</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>mtcars</code></strong> 🚗</td>
+<td>Car performance data (mpg, cylinders, hp)</td>
+</tr>
+<tr class="even">
+<td><strong><code>iris</code></strong> 🌸</td>
+<td>Iris flower measurements (sepal, petal, species)</td>
+</tr>
+<tr class="odd">
+<td><strong><code>diamonds</code></strong> 💎</td>
+<td>Diamond pricing (carat, cut, price, etc.)</td>
+</tr>
+<tr class="even">
+<td><strong><code>faithful</code></strong> 🌋</td>
+<td>Old Faithful geyser eruptions (duration, waiting time)</td>
+</tr>
+<tr class="odd">
+<td><strong><code>airquality</code></strong> 🌍</td>
+<td>New York air quality data (Ozone, Temp, Wind)</td>
+</tr>
+<tr class="even">
+<td><strong><code>ToothGrowth</code></strong> 🦷</td>
+<td>Vitamin C &amp; tooth growth in guinea pigs</td>
+</tr>
+</tbody>
+</table>
+<p>🛠️ <strong>Try it out yourself!</strong></p>
+<p>💬 <strong>What did you learn? What worked well? Any surprises?</strong></p>
+</section></section>
 <section>
 <section id="outline-for-today-3" class="title-slide slide level1">
 <h1>Outline for today</h1>
@@ -1244,10 +1322,24 @@ Source: Ed Hawkins/showyourstripes.info.
 </ol>
 <p><span style="font-weight: bold; color: orange">4. Next-steps</span></p>
 </section>
+<section id="you-can-deploy-an-app-for-free-on-shinyapps.io" class="slide level2">
+<h2>You can deploy an app for free on <strong><code>shinyapps.io</code></strong></h2>
+<p>Follow <a href="https://shiny.posit.co/r/articles/share/shinyapps/">this guide</a></p>
+<ol type="1">
+<li>Create a shinyapps.io account</li>
+<li>Open your tokens, click “Show”, copy the code</li>
+<li>Run the code in RStudio</li>
+<li>Deploy your app:</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="fu">library</span>(rsconnect)</span>
+<span id="cb8-2"><a href=""></a><span class="fu">deployApp</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 <section id="how-much-time-do-you-have" class="slide level2">
 <h2>How much time do you have?</h2>
 <ul>
-<li><strong>10min</strong>: Print out this <a href="https://shiny.posit.co/r/articles/start/cheatsheet/">Shiny for R cheatsheet</a></li>
+<li><strong>10 min</strong>: Print out this <a href="https://shiny.posit.co/r/articles/start/cheatsheet/">Shiny for R cheatsheet</a></li>
 <li><strong>2.5 hrs</strong>: Follow this <a href="https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/">Posit tutorial</a></li>
 <li><strong>1 week</strong>: If you are an EOH student, participate in the <code>2025 EOH Data Visualization Competition</code>!</li>
 <li><strong>6 weeks</strong>: Sign-up for <code>PUBH6199 Visualizing Data with R</code> this summer!</li>
@@ -1282,6 +1374,10 @@ Source: Ed Hawkins/showyourstripes.info.
 <p><img data-src="img/eoh-data-viz-comp.png" style="height: 90%; display: block; margin: auto;"></p>
 </div></div>
 </section>
+<section id="reach-climate-and-health-research-fellowship" class="slide level2">
+<h2>REACH Climate and Health Research Fellowship</h2>
+
+<img data-src="img/reach_fellow_flyer.png" style="display: block; margin: auto;" class="r-stretch"></section>
 <section id="pubh6199-visualizing-data-with-r" class="slide level2">
 <h2>PUBH6199 Visualizing Data with R</h2>
 

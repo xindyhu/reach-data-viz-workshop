@@ -37,6 +37,12 @@ a:hover, a:active, a:focus {
     text-decoration: underline;
 }
 
+a {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 .remark-code {
   color: #2c6793;
 }
