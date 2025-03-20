@@ -2,271 +2,332 @@ library(shiny)
 library(shinydashboard)
 library(tidyverse)
 library(ggplot2)
-library(DT)
-library(plotly)
+library(maps)
+library(fmsb)
 library(viridis)
+library(DT)
+library(scales)
+library(plotly)
+library(htmlwidgets)
 
-options(shiny.reactlog = TRUE)
-
-coffee_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
-
-coffee_clean <- coffee_ratings %>%
-  filter(!is.na(total_cup_points), !is.na(country_of_origin)) %>%
-  mutate(
-    quality_category = case_when(
-      total_cup_points >= 85 ~ "Excellent",
-      total_cup_points >= 80 ~ "Very Good",
-      total_cup_points >= 75 ~ "Good",
-      TRUE ~ "Fair"
-    ),
-    processing_method = ifelse(is.na(processing_method), "Unknown", processing_method)
-  )
-
-ui <- dashboardPage(
+ui <- fluidPage(
+  tags$head(
+    tags$style(HTML("
+      .box-header {
+        background-color: #4682B4;
+        color: white;
+      }
+      .box {
+        border-radius: 0;
+        box-shadow: none;
+        margin-bottom: 15px;
+      }
+      .sidebar {
+        background-color: #2A3F54;
+        color: white;
+        padding: 20px;
+        height: 100vh;
+      }
+      .main-header {
+        background-color: #4682B4;
+        color: white;
+      }
+    "))
+  ),
   
-  dashboardHeader(title = "Coffee Dashboard", titleWidth = 230),
-  
-  dashboardSidebar(
-    width = 230,
-    h3("Country", style = "padding-left: 15px; color: white;"),
-    selectInput(
-      "country_filter", 
-      NULL,
-      choices = c("All", sort(unique(coffee_clean$country_of_origin))),
-      selected = "All",
-      width = "90%"
-    ),
-    
-    tags$div(
-      style = "padding: 15px;",
-      checkboxGroupInput(
-        "quality_filter", 
-        "Quality Category:",
-        choices = c("Excellent", "Very Good", "Good", "Fair"),
-        selected = c("Excellent", "Very Good", "Good", "Fair")
-      ),
-      
-      selectInput(
-        "variety_filter", 
-        "Bean Variety:",
-        choices = c("All", sort(unique(na.omit(coffee_clean$variety)))),
-        selected = "All"
-      ),
-      
-      selectInput(
-        "processing_filter", 
-        "Processing Method:",
-        choices = c("All", sort(unique(na.omit(coffee_clean$processing_method)))),
-        selected = "All"
-      )
+  fluidRow(
+    column(12,
+           div(style = "background-color: #4682B4; color: white; padding: 10px; margin-bottom: 15px;",
+               h2("Coffee Data Dashboard", style = "margin: 0;"),
+               actionButton("toggle", "", icon = icon("bars"),
+                            style = "background: none; border: none; color: white; float: left; margin-right: 10px;")
+           )
     )
   ),
   
-  
-  dashboardBody(
-    tags$head(
-      tags$style(HTML("
-        .content-wrapper { background-color: #f5f5f5; }
-        .box { border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
-        .box-header { border-bottom: 1px solid #f4f4f4; }
-      "))
+  fluidRow(
+    
+    column(3,
+           div(class = "sidebar",
+               h3("Species:"),
+               selectInput("species", NULL, choices = c("All"), selected = "All"),
+               
+               h3("Quality Category:"),
+               checkboxInput("excellent", "Excellent", value = TRUE),
+               checkboxInput("veryGood", "Very Good", value = TRUE),
+               checkboxInput("good", "Good", value = TRUE),
+               checkboxInput("fair", "Fair", value = TRUE),
+               
+               h3("Country:"),
+               selectizeInput("country", NULL, choices = c("All"), selected = "All", multiple = TRUE)
+           )
     ),
     
-    fluidRow(
-      
-      box(
-        title = "Avg Flavour Profile",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 6,
-        plotlyOutput("flavor_profile", height = 400)
-      ),
-      
-      
-      box(
-        title = "Bean Variety",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 6,
-        plotlyOutput("bean_variety", height = 400)
-      )
-    ),
-    
-    fluidRow(
-      
-      box(
-        title = "How different are the flavour profiles?",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 6,
-        plotlyOutput("flavor_comparison", height = 400)
-      ),
-      
-      box(
-        title = "Coffee Details",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 6,
-        DTOutput("coffee_table")
-      )
+    # Main content area
+    column(9,
+           fluidRow(
+             column(6,
+                    div(class = "box",
+                        div(h3("Number of Bean Variety")),
+                        plotlyOutput("beanVarietyPlot", height = "350px")
+                    )
+             ),
+             column(6,
+                    div(class = "box",
+                        div(h3("Average Flavour Profile")),
+                        plotlyOutput("flavourProfile", height = "350px")
+                    )
+             )
+           ),
+           fluidRow(
+             column(6,
+                    div(class = "box",
+                        div(h3("Coffee Ratings by Processing Method")),
+                        plotlyOutput("flavourComparisonPlot", height = "350px")
+                    )
+             ),
+             column(6,
+                    div(class = "box",
+                        div(h3("Average Coffee Ratings by Country")),
+                        plotlyOutput("coffeeDetails", height = "350px")
+                    )
+             )
+           )
     )
   )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
+  coffee_ratings <- reactiveVal()
   
+  observe({
+    data <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
+    
+    clean_data <- data %>%
+      filter(!is.na(total_cup_points), !is.na(country_of_origin)) %>%
+      mutate(
+        quality_category = case_when(
+          total_cup_points >= 90 ~ "Outstanding",
+          total_cup_points >= 85 ~ "Excellent",
+          total_cup_points >= 80 ~ "Very Good",
+          total_cup_points >= 75 ~ "Good",
+          TRUE ~ "Fair"
+        ),
+        processing_method = ifelse(is.na(processing_method), "Unknown", processing_method),
+        processing_method = fct_lump(processing_method, n = 5)
+      )
+    
+    coffee_ratings(clean_data)
+    
+    updateSelectInput(session, "species",
+                      choices = c("All", sort(unique(clean_data$species))))
+    
+    updateSelectizeInput(session, "country",
+                      choices = c("All", sort(unique(clean_data$country_of_origin))))
+  })
   
   filtered_data <- reactive({
-    data <- coffee_clean
+    data <- coffee_ratings()
     
-    
-    if (input$country_filter != "All") {
-      data <- data %>% filter(country_of_origin == input$country_filter)
+    if (is.null(data)) {
+      return(NULL)
     }
     
-    if (input$variety_filter != "All") {
-      data <- data %>% filter(variety == input$variety_filter)
+    if (input$species != "All") {
+      data <- data %>% filter(species == input$species)
     }
     
-    if (input$processing_filter != "All") {
-      data <- data %>% filter(processing_method == input$processing_filter)
+    if (is.null(input$country) || "All" %in% input$country) {
+      data <- data # Return all data if "All" is selected
+    } else {
+      data <- data %>% filter(country_of_origin %in% input$country) # Filter otherwise
     }
     
-    data <- data %>% filter(quality_category %in% input$quality_filter)
+    quality_filters <- c()
+    if (input$excellent) quality_filters <- c(quality_filters, "Excellent")
+    if (input$veryGood) quality_filters <- c(quality_filters, "Very Good")
+    if (input$good) quality_filters <- c(quality_filters, "Good")
+    if (input$fair) quality_filters <- c(quality_filters, "Fair")
+    
+    if (length(quality_filters) > 0) {
+      data <- data %>% filter(quality_category %in% quality_filters)
+    }
     
     return(data)
   })
   
-  output$flavor_profile <- renderPlotly({
-    req(nrow(filtered_data()) > 0)
+  output$flavourProfile <- renderPlotly({
+    data <- filtered_data()
     
-    flavor_data <- filtered_data() %>%
-      summarise(
-        Aftertaste = mean(aftertaste, na.rm = TRUE),
-        Body = mean(body, na.rm = TRUE),
-        Acidity = mean(acidity, na.rm = TRUE),
-        Aroma = mean(aroma, na.rm = TRUE),
-        Balance = mean(balance, na.rm = TRUE),
-        Flavor = mean(flavor, na.rm = TRUE),
-        `Cupper Points` = mean(cupper_points, na.rm = TRUE),
-        `Clean Cup` = mean(clean_cup, na.rm = TRUE),
-        Sweetness = mean(sweetness, na.rm = TRUE),
-        Uniformity = mean(uniformity, na.rm = TRUE)
-      ) %>%
-      pivot_longer(cols = everything(), names_to = "Attribute", values_to = "Score")
+    if (is.null(data) || nrow(data) == 0) {
+      return(NULL)
+    }
     
+    all_data_summary <- data %>%
+      summarise(across(c(aroma, flavor, aftertaste, acidity, body, balance, uniformity, clean_cup, sweetness),
+                       mean, na.rm = TRUE)) %>%
+      mutate(country = "All Selected Data")
     
-    p <- ggplot(flavor_data, aes(x = Score, y = reorder(Attribute, Score), color = Attribute)) +
-      geom_segment(aes(x = 0, xend = Score, y = Attribute, yend = Attribute), 
-                   color = "gray80") +
-      geom_point(size = 12, alpha = 0.7) +
-      scale_color_viridis_d() +
-      scale_x_continuous(limits = c(0, 10), breaks = seq(0, 10, 2.5)) +
-      labs(x = "", y = "") +
-      theme_minimal() +
-      theme(
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor = element_blank(),
-        legend.position = "none",
-        plot.background = element_rect(fill = "white", color = NA),
-        panel.background = element_rect(fill = "white", color = NA)
+    top_countries_summary <- data %>%
+      group_by(country_of_origin) %>%
+      summarise(across(c(aroma, flavor, aftertaste, acidity, body, balance, uniformity, clean_cup, sweetness),
+                       mean, na.rm = TRUE),
+                count = n()) %>%
+      filter(count >= 5) %>%
+      rename(country = country_of_origin)
+    
+    combined_summary <- bind_rows(all_data_summary, top_countries_summary)
+    
+    categories <- c("aroma", "flavor", "aftertaste", "acidity", "body", "balance", "uniformity", "clean_cup", "sweetness")
+    
+    plot <- plot_ly()
+    
+
+    for (i in 1:nrow(combined_summary)) {
+      country_name <- combined_summary$country[i]
+      values <- as.numeric(combined_summary[i, categories])
+      if (country_name == "All Selected Data") {
+        line_width <- 3
+        color <- "rgba(70, 130, 180, 0.8)"  # Bold blue
+      } else {
+        line_width <- 1.5
+        color <- viridisLite::viridis(nrow(combined_summary) - 1, alpha = 0.7)[i - 1]
+      }
+      
+      plot <- plot %>% add_trace(
+        type = 'scatterpolar',
+        r = round(values, 2),
+        theta = stringr::str_to_title(categories),
+        name = country_name,
+        fill = ifelse(country_name == "All Selected Data", 'toself', 'none'),
+        fillcolor = ifelse(country_name == "All Selected Data", "rgba(70, 130, 180, 0.3)", NA),
+        line = list(color = color, width = line_width),
+        hovertemplate = paste(
+          "<b>Country:</b> ", country_name, "<br>",
+          "<b>Category:</b> %{theta}<br>",
+          "<b>Value:</b> %{r}<extra></extra>"  # <extra></extra> removes trace name in tooltip
+        )
       )
-    
-    ggplotly(p)
+    }
+    plot %>% layout(
+      polar = list(
+        radialaxis = list(
+          visible = TRUE,
+          range = c(0, 10)
+        )
+      ),
+      showlegend = TRUE,
+      legend = list(x = 0.8, y = 0.1),
+      title = ""
+    )
   })
-  
-  output$bean_variety <- renderPlotly({
-    req(nrow(filtered_data()) > 0)
+
+  output$beanVarietyPlot <- renderPlotly({
+    data <- filtered_data()
     
-    variety_data <- filtered_data() %>%
+    if (is.null(data) || nrow(data) == 0) {
+      return(NULL)
+    }
+    
+    variety_data <- data %>%
       filter(!is.na(variety)) %>%
       count(variety) %>%
       arrange(desc(n)) %>%
       slice_head(n = 10)
     
-    p <- ggplot(variety_data, aes(x = n, y = reorder(variety, n), fill = n)) +
-      geom_col() +
-      scale_fill_gradient(low = "#ff9a8c", high = "#ff6347") +
-      labs(x = "n", y = "") +
+    p <- ggplot(variety_data, aes(x = n, y = reorder(variety, n), text = variety)) +
+      geom_col(fill = 'skyblue') +
       theme_minimal() +
+      labs(x = "Count", y = "") +
       theme(
-        legend.position = "none",
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor = element_blank(),
-        plot.background = element_rect(fill = "white", color = NA),
-        panel.background = element_rect(fill = "white", color = NA)
+        axis.title.y = element_blank(),
+        panel.grid.minor = element_blank()
       )
-    
-    ggplotly(p)
-  })
-  
-  
-  output$flavor_comparison <- renderPlotly({
-    req(nrow(filtered_data()) > 0)
-    
-    flavor_stats <- filtered_data() %>%
-      summarise(across(
-        c(body, aroma, aftertaste, acidity, balance, flavor, cupper_points, sweetness),
-        list(
-          min = ~ min(.x, na.rm = TRUE),
-          q1 = ~ quantile(.x, 0.25, na.rm = TRUE),
-          median = ~ median(.x, na.rm = TRUE),
-          q3 = ~ quantile(.x, 0.75, na.rm = TRUE),
-          max = ~ max(.x, na.rm = TRUE)
-        )
-      )) %>%
-      pivot_longer(
-        cols = everything(),
-        names_to = c("attribute", "stat"),
-        names_pattern = "(.*)_(.*)"
-      ) %>%
-      pivot_wider(names_from = stat, values_from = value) %>%
-      mutate(attribute = factor(attribute, levels = c(
-        "body", "aroma", "aftertaste", "acidity", "balance", 
-        "flavor", "cupper_points", "sweetness"
-      )))
-    
-    p <- ggplot(flavor_stats, aes(y = attribute)) +
-      geom_segment(aes(x = min, xend = max, yend = attribute), color = "lightblue") +
-      geom_segment(aes(x = q1, xend = q3, yend = attribute), color = "skyblue", size = 2) +
-      geom_point(aes(x = median), color = "blue", size = 3) +
-      geom_vline(xintercept = 6, linetype = "dashed", color = "black") +
-      scale_x_continuous(limits = c(0, 10), breaks = seq(0, 10, 2.5)) +
-      labs(x = "", y = "") +
-      theme_minimal() +
-      theme(
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor = element_blank(),
-        plot.background = element_rect(fill = "white", color = NA),
-        panel.background = element_rect(fill = "white", color = NA)
+    ggplotly(p, tooltip = c("text", "x")) %>%
+      layout(
+        hoverlabel = list(bgcolor = "white"),
+        margin = list(l = 100)  # Increase left margin for longer variety names
       )
-    
-    ggplotly(p)
   })
-  
-  output$coffee_table <- renderDT({
-    req(nrow(filtered_data()) > 0)
+  output$flavourComparisonPlot <- renderPlotly({
+    data <- filtered_data()
     
-    table_data <- filtered_data() %>%
-      select(
-        points = total_cup_points,
-        species,
-        country = country_of_origin,
-        region
+    if (is.null(data) || nrow(data) == 0) {
+      return(NULL)
+    }
+    valid_methods <- data %>%
+      count(processing_method) %>%
+      filter(n >= 5) %>%
+      pull(processing_method)
+    
+    plot_data <- data %>%
+      filter(processing_method %in% valid_methods) %>%
+      group_by(processing_method) %>%
+      mutate(avg_score = mean(total_cup_points)) %>%
+      ungroup()
+    p <- ggplot(plot_data, aes(x = total_cup_points, y = reorder(as.factor(processing_method), avg_score))) +
+      geom_jitter(aes(text = paste("Country:", country_of_origin,
+                                   "<br>Score:", round(total_cup_points, 2),
+                                   "<br>Variety:", variety)),
+                  alpha = 0.6, height = 0.2, width = 0, color = "darkblue", size = 1.5) +
+      stat_summary(fun = mean, geom = "point", shape = 18, size = 2, color = "red") +
+      labs(
+        title = "",
+        x = "Total Cup Points",
+        y = ""
+      ) +
+      theme_minimal()
+    ggplotly(p, tooltip = "text") %>%
+      layout(
+        annotations = list(
+          # Subtitle
+          list(
+            x = 0.5, y = 1.05, text = "Methods with 5+ samples, ordered by average score (red diamond)",
+            showarrow = FALSE, xref = "paper", yref = "paper",
+            font = list(size = 12)
+          )))
+  })
+  output$coffeeDetails <- renderPlotly({
+    data <- filtered_data()
+    
+    if (is.null(data) || nrow(data) == 0) {
+      return(NULL)
+    }
+    country_summary <- data %>%
+      group_by(country_of_origin) %>%
+      summarise(
+        mean_score = mean(total_cup_points, na.rm = TRUE),
+        count = n(),
+        median_score = median(total_cup_points, na.rm = TRUE)
       ) %>%
-      arrange(desc(points)) %>%
-      head(10)
-    
-    datatable(
-      table_data,
-      options = list(
-        pageLength = 5,
-        dom = 't',
-        ordering = TRUE,
-        scrollX = FALSE
+      filter(count >= 5) %>%
+      arrange(desc(mean_score))
+    plot_ly(
+      data = country_summary,
+      type = 'choropleth',
+      locations = ~country_of_origin,
+      locationmode = 'country names',
+      z = ~mean_score,
+      text = ~paste(
+        "Country: ", country_of_origin,
+        "<br>Average Score: ", round(mean_score, 2),
+        "<br>Number of Samples: ", count
       ),
-      rownames = FALSE
-    )
+      colorscale = 'Viridis',
+      reversescale = TRUE,
+      marker = list(line = list(color = 'rgb(255,255,255)', width = 0.5))
+    ) %>%
+      colorbar(title = "Average Score") %>%
+      layout(
+        title = "",
+        geo = list(
+          showframe = FALSE,
+          showcoastlines = TRUE,
+          projection = list(type = 'natural earth')
+        )
+      )
+  })
+  observeEvent(input$toggle, {
   })
 }
 
