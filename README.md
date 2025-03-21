@@ -2,7 +2,7 @@
 
 ## 📌 Overview
 Welcome to the **Data Visualization Workshop** for members of the REACH Center and GWSPH students! 
-This workshop is designed to introduce participants to key concepts and best practices for visualizing data using **R** and **ggplot2**. By the end of the session, you will be able to create effective, insightful, and reproducible visualizations.
+This workshop is designed to introduce participants to key concepts and best practices for visualizing data using **R** and **R Shiny**. By the end of the session, you will be able to create effective, insightful, and reproducible visualizations.
 
 ## 🎯 Learning Objectives
 * Understand the basics of data visualization
