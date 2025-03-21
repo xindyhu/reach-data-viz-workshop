@@ -1,0 +1,283 @@
+---
+title: "Coffee Ratings Analysis"
+author: "Workshop Step1"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Loading Libraries and Data
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(maps)
+library(fmsb)
+library(viridis)
+coffee_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
+```
+
+## Data Cleaning and Preparation
+
+```{r}
+# Clean and preprocess the coffee ratings data
+coffee_clean <- coffee_ratings %>%
+  # Remove rows with missing values in `total_cup_points` and `country_of_origin`
+  filter(!is.na(total_cup_points), !is.na(country_of_origin)) %>%
+  mutate(
+    # Categorize coffee quality based on `total_cup_points`
+    quality_category = case_when(
+      total_cup_points >= 90 ~ "Outstanding",
+      total_cup_points >= 85 ~ "Excellent",
+      total_cup_points >= 80 ~ "Very Good",
+      total_cup_points >= 75 ~ "Good",
+      TRUE ~ "Fair"  # Default category for scores below 75
+    ),
+    # Fill missing values in `processing_method` with "Unknown"
+    processing_method = ifelse(is.na(processing_method), "Unknown", processing_method),
+    # Lump together less common `processing_method` categories, keeping only the top 5 most frequent
+    processing_method = fct_lump(processing_method, n = 5)
+  )
+
+# Summarize coffee ratings by country
+country_summary <- coffee_clean %>%
+  group_by(country_of_origin) %>%  # Group data by country of origin
+  summarise(
+    mean_score = mean(total_cup_points, na.rm = TRUE),  # Compute mean cup score per country
+    count = n(),  # Count number of ratings per country
+    median_score = median(total_cup_points, na.rm = TRUE)  # Compute median cup score per country
+  ) %>%
+  # Keep only countries with at least 5 ratings to ensure reliability
+  filter(count >= 5) %>%
+  # Arrange countries in descending order by mean score
+  arrange(desc(mean_score))
+```
+```{r}
+head(country_summary)
+```
+
+## 1. Bar Chart: Bean Varieties Count
+
+```{r bar-chart, fig.width=7, fig.height=5}
+# Prepare variety data for visualization
+variety_data <- coffee_clean %>%
+  filter(!is.na(variety)) %>%  # Remove rows with missing `variety` values
+  count(variety) %>%  # Count occurrences of each coffee variety
+  arrange(desc(n)) %>%  # Arrange in descending order by count
+  slice_head(n = 10)  # Select the top 10 most common varieties
+
+# Create a bar plot of the top 10 coffee varieties
+ggplot(variety_data, aes(
+  x = n,  # Number of occurrences
+  y = reorder(variety, n),  # Reorder varieties by count for better visualization
+  text = variety  # (Optional: useful for interactive plots with tooltips)
+)) +
+  geom_col(fill = 'skyblue') +  # Create a bar chart with sky blue bars
+  theme_minimal() +  # Use a minimalistic theme for a clean look
+  labs(x = "Count", y = "") +  # Label the x-axis and remove the y-axis label
+  theme(
+    axis.title.y = element_blank(),  # Explicitly remove y-axis title
+    panel.grid.minor = element_blank()  # Remove minor grid lines for clarity
+  )
+```
+
+## 2. Dot Plot: Coffee Ratings by Processing Method
+
+```{r dot-plot, fig.width=7, fig.height=5}
+# Identify valid processing methods (those with at least 5 samples)
+valid_methods <- coffee_clean %>%
+  count(processing_method) %>%  # Count occurrences of each processing method
+  filter(n >= 5) %>%  # Keep only methods with at least 5 occurrences
+  pull(processing_method)  # Extract the list of valid methods
+
+# Filter data for valid processing methods and create a boxplot
+coffee_clean %>%
+  filter(processing_method %in% valid_methods) %>%  # Keep only valid processing methods
+  group_by(processing_method) %>%  # Group by processing method
+  mutate(avg_score = mean(total_cup_points)) %>%  # Calculate the average score for each method
+  ungroup() %>%  # Ungroup to avoid unintended grouping in ggplot
+  ggplot(aes(x = total_cup_points, y = reorder(processing_method, avg_score))) +  # Reorder methods by avg score
+  geom_jitter(alpha = 0.6, height = 0.2, width = 0, color = "darkblue", size = 1.5) +  # Add jittered points for individual scores
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "red") +  # Highlight mean score with a red diamond
+  theme_minimal() +  # Apply a clean theme
+  labs(
+    title = "Coffee Ratings by Processing Method",  # Plot title
+    subtitle = "Methods with 5+ samples, ordered by average score (red diamond)",  # Subtitle explaining the ranking
+    x = "Total Cup Points",  # X-axis label
+    y = ""  # Remove Y-axis label for simplicity
+  )
+```
+
+## 3. Radar Chart: Sensory Profiles of Top Coffees
+
+### Don't do this
+
+```{r radar-chart, fig.width=10, fig.height=5}
+
+# Calculate the average score for each attribute for each country
+top_coffees <- coffee_clean %>%
+  group_by(country_of_origin) %>%
+      summarise(across(c(aroma, flavor, aftertaste, acidity, body, balance, uniformity, clean_cup, sweetness),
+                       mean, na.rm = TRUE),
+                count = n()) %>%
+      filter(count >= 5) %>%
+  dplyr::select(-count)
+
+# Convert country names into row names for radar chart compatibility
+radar_data <- top_coffees %>%
+  column_to_rownames(var = "country_of_origin") 
+
+# Append maximum and minimum reference values for radar chart scaling
+radar_data <- rbind(
+  rep(10, ncol(radar_data)),  # Max value (10) for each attribute
+  rep(0, ncol(radar_data)),   # Min value (0) for each attribute
+  radar_data  # Append actual data
+)
+
+# Generate color palette for radar plot
+radar_colors <- viridis(nrow(radar_data) - 2)  # Exclude first two reference rows
+
+# Set graphical parameters for margins
+par(mar = c(1, 1, 3, 1))  # Adjust margins (bottom, left, top, right)
+
+# Create radar chart
+radarchart(
+  radar_data,
+  pcol = radar_colors,  # Line colors
+  pfcol = adjustcolor(radar_colors, alpha.f = 0.3),  # Fill colors with transparency
+  plwd = 2,  # Line width
+  cglcol = "grey",  # Grid line color
+  cglty = 1,  # Grid line type
+  axislabcol = "grey30",  # Axis label color
+  vlcex = 0.8,  # Text size for labels
+  title = "Sensory Profiles of Top Coffees by Country"  # Chart title
+)
+
+# Add a legend to indicate which country each radar plot corresponds to
+legend(
+  "topright",  # Position legend at the top right
+  legend = rownames(radar_data)[3:nrow(radar_data)],  # Exclude max/min reference rows
+  col = radar_colors,  # Use the same colors as in the radar chart
+  lty = 1,  # Line type
+  lwd = 2,  # Line width
+  pch = 20,  # Point symbol
+  bty = "n",  # No legend box
+  cex = 0.8   # Text size
+)
+```
+
+### One country at a time
+
+```{r fig.width=10, fig.height=10}
+# Create a function to plot a single radar chart
+plot_radar <- function(country_data, country_name) {
+  # Prepare data for single country
+  radar_data <- country_data %>%
+    select(-country_of_origin) %>%
+    as.data.frame()
+  
+  # Add max and min for scaling
+  radar_data <- rbind(
+    rep(10, ncol(radar_data)),  # Max values
+    rep(0, ncol(radar_data)),   # Min values
+    radar_data
+  )
+  
+  # Set up plotting area
+  par(mar = c(1, 1, 3, 1))
+  
+  # Create the radar chart
+  radarchart(
+    radar_data,
+    pcol = viridis(1),
+    pfcol = adjustcolor(viridis(1), alpha.f = 0.5),
+    plwd = 2,
+    cglcol = "grey",
+    cglty = 1,
+    axislabcol = "grey30",
+    vlcex = 0.8,
+    title = country_name
+  )
+}
+
+# Create small multiples
+# Set up the plotting grid
+n_countries <- nrow(top_coffees)
+n_cols <- min(6, n_countries)  # Use at most 6 columns
+n_rows <- ceiling(n_countries / n_cols)
+
+# Create the plot layout
+par(mfrow = c(n_rows, n_cols), mar = c(0.5, 0.5, 2, 0.5))
+
+# Plot each country's radar chart
+for (i in 1:n_countries) {
+  country_data <- top_coffees[i, ]
+  plot_radar(country_data, country_data$country_of_origin)
+}
+```
+
+
+## 4. World Map: Coffee Ratings by Country
+
+```{r}
+
+# Use the summarized country data for mapping
+map_data <- country_summary
+
+# Load world map data
+world <- map_data("world")
+
+# List country names that need to be standardized
+country_name_map <- c(
+  "United States" = "USA",
+  "Tanzania, United Republic Of" = "Tanzania"
+)
+
+# Update country names in map_data
+map_data <- map_data %>%
+  mutate(country_of_origin = recode(country_of_origin, !!!country_name_map))
+
+# Create a choropleth world map visualizing coffee ratings
+ggplot() +
+  # Base world map layer (light gray landmasses)
+  geom_map(
+    data = world, map = world,
+    aes(long, lat, map_id = region),  # Use longitude, latitude, and region info for mapping
+    color = "white", fill = "lightgray", size = 0.1  # Light gray landmasses with white borders
+  ) +
+  # Overlay coffee rating data, filling countries based on their average cup score
+  geom_map(
+    data = map_data, map = world,
+    aes(map_id = country_of_origin, fill = mean_score),  # Use country as map_id, color by mean score
+    color = "white", size = 0.1  # Thin white borders around countries
+  ) +
+  # Color scale using `viridis` for better contrast and accessibility
+  scale_fill_viridis_c(
+    option = "plasma", direction = -1,  # Plasma color scheme with reversed direction
+    name = "Average Score",  # Legend title
+    limits = c(min(map_data$mean_score), max(map_data$mean_score))  # Set color scale range
+  ) +
+  # Add titles and captions
+  labs(
+    title = "Average Coffee Ratings by Country of Origin",
+    subtitle = "Countries with at least 5 samples in the dataset",
+    caption = "Source: Coffee Quality Institute"
+  ) +
+  # Apply a minimal theme for a clean design
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),  # Remove grid lines
+    axis.text = element_blank(),   # Remove axis text
+    axis.title = element_blank(),  # Remove axis titles
+    axis.ticks = element_blank(),  # Remove axis ticks
+    legend.position = "bottom"  # Move legend to the bottom
+  )
+```
