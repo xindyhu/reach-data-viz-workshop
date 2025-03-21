@@ -475,11 +475,10 @@ ggplot(country_summary,
 # Normalize value so that the maximum value is represented by 90 degrees
 
 max_n <- max(country_summary$n)  
-min_n <- min(country_summary$n)
 
 # Function to convert value to angle in degrees
 value_to_angle <- function(x) {
-  return(scales::rescale(x, to = c(0, 89), from = c(min_n, max_n)))
+  return(scales::rescale(x, to = c(0, 89), from = c(0, max_n)))
 }
 
 # Plot
@@ -503,6 +502,7 @@ country_summary %>%
         axis.title.y = element_blank()) 
 
 ```
+
 ## Pie chart uses angle to encode quantitative information
 
 . . .  
