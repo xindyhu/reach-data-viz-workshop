@@ -29,8 +29,9 @@ execute:
 
 <h3> `r fontawesome::fa("github", "black")` &nbsp; [github.com/xindyhu/reach-data-viz-workshop](https://github.com/xindyhu/reach-data-viz-workshop.git)
 
-![](img/gw_primary_2c_0.png){.absolute top=680 left=1650 width="300"}
-![](img/reach-logo.jpg){.absolute top=680 left=1250 width="300"}
+![](img/gw_primary_2c_0.png){.absolute top=680 left=1400 width="300"}
+![](img/reach-logo.jpg){.absolute top=680 left=1000 width="300"}
+
 
 ## Meet Your Instructor 👩
 ::: columns
@@ -52,6 +53,13 @@ execute:
 
 :::
 :::
+
+## Meet your classmates 👥
+
+Join at menti.com using code 87160620
+
+![](img/mentimeter_qr_code.png){style="width: 70%; display: block; margin: auto;"}
+
 
 ## Acknowledgements
 
