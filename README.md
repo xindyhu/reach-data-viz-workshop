@@ -32,6 +32,10 @@ All materials, including datasets and scripts, are available in this repository.
 ```sh
 git clone https://github.com/xindyhu/reach-data-viz-workshop.git
 ```
+The slides are in the `/docs` folder.
+Code for R markdown and shiny apps are in the `/shiny-apps` folder
+
+Alternatively you can see the slides [here](https://xindyhu.github.io/reach-data-viz-workshop/#/)
 
 ## 🤝 Contributors
 Instructor: **Xindi (Cindy) Hu, ScD**  
