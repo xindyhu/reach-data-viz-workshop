@@ -1,0 +1,1161 @@
+---
+format: 
+  revealjs:
+    theme: ["theme/q-theme.scss"]
+    slide-number: c/t
+    code-copy: true
+    center-title-slide: false
+    include-in-header: heading-meta.html
+    code-link: true
+    code-overflow: wrap
+    highlight-style: a11y
+    height: 1080
+    width: 1920
+execute: 
+  eval: true
+  echo: false
+---
+
+<h1> Data Visualization Workshop </h1>
+
+<h2> with R shiny and Shiny Assistant </h2>
+
+<hr>
+
+<h3> Dr. Xindi (Cindy) Hu, Assistant Professor at GWSPH</h3>
+
+<h3> 03-21-2025</h3>
+<br>
+
+<h3> `r fontawesome::fa("github", "black")` &nbsp; [github.com/xindyhu/reach-data-viz-workshop](https://github.com/xindyhu/reach-data-viz-workshop.git)
+
+![](img/gw_primary_2c_0.png){.absolute top=680 left=1400 width="300"}
+![](img/reach-logo.jpg){.absolute top=680 left=1000 width="300"}
+
+
+## Meet Your Instructor 👩
+::: columns
+::: {.column width="25%"}
+![](img/XindiHu_Headshot_2024.jpg){style="border-radius: 70%; width: 70%; display: block; margin: auto;"}
+:::
+
+::: {.column width="75%"}
+
+### **Xindi (Cindy) Hu, ScD**
+**Assistant Professor, George Washington University**
+
+- Environmental Data Scientist and Environmental Health Researcher
+- 2024- Water, Health, Opportunity Lab at GW
+- 2018-2024 Principal Data Scientist at Mathematica, Inc.
+- 2018 ScD in Environmental Health, Harvard T.H. Chan School of Public Health
+- 2014 MS in Environmental Health, Harvard T.H. Chan School of Public Health
+- 2012 BS in Environmental Science, Peking University, China
+
+:::
+:::
+
+## Meet your classmates 👥
+
+Join at menti.com using code 87160620
+
+![](img/mentimeter_qr_code.png){style="width: 70%; display: block; margin: auto;"}
+
+
+## Acknowledgements
+
+>Much of the content in this section is from  [John Rauser's talk](https://www.youtube.com/watch?v=fSgEeI2Xpdc) on YouTube and [JP Helveston's course](https://eda.seas.gwu.edu/2024-Fall/class/6-visualizing-information) on Exploratory Data Analysis
+
+>A special thanks to [Sayam Mukesh Palrecha](https://www.linkedin.com/in/sayampalrecha/), a Master of Science in Data Science candidate at GWU, class of 2026, for his invaluable assistance with preparing the R markdown and the R shiny code.
+
+## Learning objectives
+* Understand the basics of data visualization
+* Learn how to create interactive data visualization using R Shiny
+* Learn how to use Shiny Assistant to create interactive data visualization
+
+# Outline for today
+<span style="font-weight: bold; color: orange">1. How humans see data</span>
+
+2. Introduction to R Shiny
+
+3. Introduction to Shiny Assistant
+
+4. Next-steps
+
+## Good data visualization is optimized for our <span style="font-weight: bold; color: orange">visual-memory system</span>
+
+- Helps us **understand trends and patterns**
+
+- Makes data **more accessible** to different audiences
+
+- Useful in **decision-making** and **communication**
+
+. . . 
+
+![](img/memory-chart.png){style="width: 70%; display: block; margin: auto;"}
+
+## The power of pre-attentive processing
+Count all the 5s in the following image
+
+. . .
+
+![](img/fives-1.png){style="width: 60%; display: block; margin: auto;"}
+
+## The power of pre-attentive processing
+Count all the 5s in the following image
+
+. . .
+
+![](img/fives-2.png){style="width: 60%; display: block; margin: auto;"}
+
+## What is <span style="font-weight: bold; color: orange">pre-attentive processing</span>?
+
+- **Rapid, automatic processing of visual information** before conscious attention kicks in.
+- Happens within **<250 milliseconds**.
+- Helps identify key patterns **without effort**.
+
+::: {.column width="70%"}
+
+![](img/datylon-blog-mind-your-data-visualization-system-1-2-green.webp){style="width: 70%; display: block; margin: auto;"}
+:::
+
+::: {.column width="30%"}
+![](img/kahneman_book.jpeg){style="width: 77%; display: block; margin: auto;"}
+:::
+
+## Not all pre-attentive features are created equal
+
+| Feature Type | Example |
+|-------------|---------|
+| **Color**   | 🔴🔵 Different colored objects stand out |
+| **Size**    | 📏 Larger objects draw attention first |
+| **Orientation** | ↗ A tilted line among vertical lines |
+| **Shape**   | ◼️ ⬤ A square among circles |
+
+. . .
+
+**Where is the red dot?**
+
+::: {.column width="30%"}
+![](img/preattentive1.png)
+::: 
+
+::: {.column width="30%"}
+![](img/preattentive2.png){.fragment}
+:::
+
+::: {.column width="30%"}
+![](img/preattentive3.png){.fragment}
+:::
+
+
+## Pre-Attentive vs. Attentive Processing
+
+| Feature  | Pre-Attentive | Attentive |
+|----------|--------------|----------|
+| **Speed** | Instant (<250 ms) | Slow, deliberate |
+| **Effort** | Unconscious | Requires focus |
+| **Example** | Spotting a red dot in a sea of gray | Solving a math problem |
+
+🧠 **Designing charts with pre-attentive features helps viewers understand data instantly!**
+
+. . .
+
+### Why Does This Matter for Data Visualization?
+
+- Viewers **process visuals before reading text**.
+- Using pre-attentive attributes can:
+  - **Direct focus** to key insights.
+  - **Reduce cognitive load** for interpretation.
+  - **Make data storytelling more effective**.
+
+💡 **Good data visualization = Less work for the brain!** 
+
+## Cleveland's three visual operations of pattern perception
+
+🎯 **Detection**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*Recognizing that a geometric object encodes a physical value.*
+
+🧩 **Assembly**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*Grouping detected graphical elements into patterns.*
+
+📏 <span style="font-weight: bold; color: orange">**Estimation**</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*Visually assessing the relative magnitude of two or more values.*<span style="color: orange"> (Focus of today!) </span>
+
+::: {.columns}
+
+::: {.column width="50%"}
+![](img/cleveland-book.jpg){style="width: 50%; display: block; margin: auto;"}
+:::
+
+::: {.column width="50%"}
+![](img/cleveland-paper.png){style="width: 52%; display: block; margin: auto;"}
+:::
+
+:::
+
+## Three levels of estimation
+| Level | Example |
+|----------|--------------|
+|1. Discrimination |X = Y X != Y|
+|2. Ranking |X < Y X > Y|
+|3. Ratioing |X / Y = ?|
+
+📏 **We want to get as far down this list as possible with efficiency and accuracy**
+
+## The most important measurement should exploit the highest ranked encoding possible
+
+![](img/rank-visual-cues.png)
+
+Source: Yau, N. (2013). Data Points: Visualization That Means Something. Wiley.
+
+## Introducing the coffee ratings dataset
+
+:::{.columns}
+
+:::{.column width="80%"}
+- These data contain reviews of 1312 arabica and 28 robusta coffee beans from the **Coffee Quality Institute**'s trained reviewers. 
+- It contains detailed information on coffee samples from different countries, focusing on nine attributes like **aroma, flavor, aftertaste, acidity, body, balance, uniformity, cup cleanliness, sweetness**.
+- **Total cup points** measures the overall coffee quality.
+
+```{r}
+library(tidyverse)
+library(kableExtra)
+options(pillar.print_min = 20,
+        pillar.print_max = 100)
+# tuesdata <- tidytuesdayR::tt_load(2020, week = 28)
+# coffee_ratings <- tuesdata$coffee_ratings %>%
+#   filter(total_cup_points > 0, !is.na(country_of_origin))
+# write_csv(coffee_ratings, "data/coffee_ratings.csv")
+coffee_ratings <- readr::read_csv("data/coffee_ratings.csv")
+country_summary <- coffee_ratings %>%
+  mutate(country = fct_lump(country_of_origin, 18)) %>%
+  group_by(country) %>%
+  summarize(mean_rating = mean(total_cup_points, na.rm = TRUE),
+            n = n()) %>%
+  arrange(desc(mean_rating)) 
+glimpse(coffee_ratings)
+glimpse(country_summary)
+```
+
+:::
+
+:::{.column width="20%"}
+![](img/coffee.avif){style="width: 100%; display: block; margin: auto;"}
+![](img/tidytuesday.jpg){style="width: 100%; display: block; margin: auto;"}
+[(Link to dataset)](https://github.com/rfordatascience/tidytuesday/tree/main/data/2020/2020-07-07)
+:::
+
+:::
+
+## Let's start from the bottom of the list
+
+1. Position on a common scale
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. <span style = "color: orange">Color hue </span>
+
+
+## Use color hue to visualize average ratings
+
+<span style="color: darkgreen">*Easy: which has higher ratings, Kenya or Indonesia?*</span>
+
+```{r fig.width=8}
+library(ggplot2)
+country_summary %>%
+  arrange(country) %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # color scheme is red to blue
+  scale_fill_viridis_c(option = "plasma") +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+
+<div style="position: absolute; top: 48%; left: 5%;">
+  <svg width="50" height="30">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+        <polygon points="0 0, 10 5, 0 10" fill="black" />
+      </marker>
+    </defs>
+    <line x1="0" y1="15" x2="40" y2="15" stroke="black" stroke-width="2" marker-end="url(#arrowhead)" />
+  </svg>
+</div>
+
+
+<div style="position: absolute; top: 52%; left: 5%;">
+  <svg width="50" height="30">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+        <polygon points="0 0, 10 5, 0 10" fill="black" />
+      </marker>
+    </defs>
+    <line x1="0" y1="15" x2="40" y2="15" stroke="black" stroke-width="2" marker-end="url(#arrowhead)" />
+  </svg>
+</div>
+
+## Use color hue to visualize average ratings
+
+<span style="color: red">*Hard: which has higher ratings, Indonesia or Costa Rica?*</span>
+
+```{r fig.width=8}
+country_summary %>%
+  arrange(country) %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # color scheme is red to blue
+  scale_fill_viridis_c(option = "plasma") +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+
+<div style="position: absolute; top: 52%; left: 5%;">
+  <svg width="50" height="30">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+        <polygon points="0 0, 10 5, 0 10" fill="black" />
+      </marker>
+    </defs>
+    <line x1="0" y1="15" x2="40" y2="15" stroke="black" stroke-width="2" marker-end="url(#arrowhead)" />
+  </svg>
+</div>
+
+
+<div style="position: absolute; top: 76%; left: 5%;">
+  <svg width="50" height="30">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
+        <polygon points="0 0, 10 5, 0 10" fill="black" />
+      </marker>
+    </defs>
+    <line x1="0" y1="15" x2="40" y2="15" stroke="black" stroke-width="2" marker-end="url(#arrowhead)" />
+  </svg>
+</div>
+
+## What about now?
+
+```{r fig.width=8}
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # color scheme is red to blue
+  scale_fill_viridis_c(option = "plasma") +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+Observation: alphabetical ordering of the categorical variable is almost never useful, re-rank as needed.
+
+## Move up one level to color saturation
+
+1. Position on a common scale
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. Area
+6. <span style = "color: orange">Volume <> Density <> Color saturation</span>
+7. Color hue 
+
+## Use color saturation to visualize average ratings
+
+```{r fig.width=7.5}
+country_summary %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # one color scheme by saturation
+  scale_fill_gradient(low = "white", high = "black", guide = NULL) +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+
+. . .
+
+<div style="position:absolute; top:50%; left:75%; transform:translateY(-50%);">
+No legend?
+
+No problem.
+
+Because color saturation has natural ordering.
+</div>
+
+## Color saturation is easier to quantify
+
+```{r fig.width=7}
+country_summary %>%
+  mutate(country = fct_reorder(country, n)) %>%
+  ggplot(aes(x = 100, y = country, fill = n)) +
+  geom_tile() +
+  # one color scheme by saturation
+  scale_fill_gradient(low = "white", high = "black", limits = c(0, NA),
+                      name = "# of coffee bean varieties") +
+  theme_minimal() +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+. . .
+
+<div style="position:absolute; top:30%; left:75%; transform:translateY(-50%);">
+The ratio between Mexico and United States is...
+</div>
+
+. . . 
+
+<div style="position:absolute; top:50%; left:75%; transform:translateY(-50%);">
+2 or 3
+
+Moving down to the third level of estimation
+</div>
+
+## Move up one level to area
+
+1. Position on a common scale
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. <span style = "color: orange">Area</span>
+6. Volume <> Density <> Color saturation
+7. Color hue 
+
+## This is weird graph but still informative
+
+```{r}
+
+ggplot(country_summary,
+       aes(
+         x = 100,
+         y = 100,
+         size = n
+       )) +
+  geom_point(shape = 21,
+             fill = "black") +  # Bubble chart with outlined points
+  scale_size_area() +  # Scale size by area
+  facet_wrap( ~ country) +  # Create small multiples by country
+  labs(size = "Coffee bean varieties\n(scaled for area)") +
+  theme_void() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()) 
+
+```
+
+## Move up one level to angle
+
+1. Position on a common scale
+2. Position on non-aligned scales
+3. Length
+4. <span style = "color: orange">Angle</span>
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+
+## Use angle to visualize coffee bean varieties
+
+```{r}
+# Normalize value so that the maximum value is represented by 90 degrees
+
+max_n <- max(country_summary$n)  
+
+# Function to convert value to angle in degrees
+value_to_angle <- function(x) {
+  return(scales::rescale(x, to = c(0, 89), from = c(0, max_n)))
+}
+
+# Plot
+country_summary %>%
+  mutate(country = fct_reorder(country, -n),
+         angle = value_to_angle(n),
+         xend = cos(angle * pi / 180),
+         yend = sin(angle * pi / 180)) %>%
+  arrange(desc(n)) %>%
+  ggplot(aes(group = country)) +
+  geom_segment(aes(x = 0, y = 0, 
+                   xend = xend, yend = yend),
+                   color = "black", linewidth = 1.5)+
+  facet_wrap(~ country) +
+  theme_void() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()) 
+
+```
+
+## Pie chart uses angle to encode quantitative information
+
+. . .  
+
+::: {.columns}
+
+::: {.column width="50%"}
+
+<span style = "color: red">Don't do this! </span>
+
+```{r fig.height=10}
+pie(country_summary$n,
+    labels = country_summary$country,
+    col = rainbow(nrow(country_summary)))
+```
+
+:::
+
+::: {.column width="50%"}
+
+<span style = "color: red">Or this! </span>
+```{r fig.height=10}
+pie(country_summary$mean_rating[1:5],
+    labels = country_summary$country[1:5],
+    col = rainbow(5))
+```
+
+:::
+
+:::
+
+## Pie chart uses angle to encode quantitative information
+
+This is fine
+
+```{r}
+coffee_ratings %>% 
+  filter(!is.na(processing_method)) %>%
+  group_by(processing_method) %>%
+  summarize(n = n()) %>%
+  ggplot(aes(x="", y=n, fill=processing_method)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  theme_void() # remove background, grid, numeric labels
+```
+For categorical data, no more than 6 colors is best.
+
+(Source: [European Environment Agency](https://www.eea.europa.eu/data-and-maps/daviz/learn-more/chart-dos-and-donts))
+
+## We are so close!
+
+::: {.column width="40%"}
+1. Position on a common scale
+2. Position on non-aligned scales
+3. <span style = "color: orange">Length</span>
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+:::
+
+::: {.column width="60%"}
+```{r fig.height=10}
+set.seed(42)
+country_summary %>%
+  mutate(noise = runif(19, 0, 5), mean_rating = mean_rating + noise) %>%
+  # Plot using geom_rect
+  ggplot(aes(y = reorder(country, -mean_rating))) +
+  geom_rect(
+    aes(
+      xmin = noise,
+      xmax = mean_rating,
+      ymin = as.numeric(factor(country)) - 0.4,
+      ymax = as.numeric(factor(country)) + 0.4
+    ),
+    fill = "skyblue",
+    color = "black"
+  ) +
+  theme_minimal(base_size = 22) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+. . .
+
+<div style="position:absolute; top:75%; left:0%; 
+transform:translateY(-50%); color:orange">
+Wait, I thought there is some difference...
+</div>
+
+## The start-at-zero rule
+
+:::{.column width="50%"}
+```{r fig.width=10, fig.height=10}
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(x = 100, y = country, fill = mean_rating)) +
+  geom_tile() +
+  # color scheme is red to blue
+  scale_fill_viridis_c(option = "plasma") +
+  theme_minimal(base_size = 22) +
+  # hide x axis
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank()) 
+```
+:::
+
+
+::: {.column width="50%"}
+```{r fig.height=10}
+set.seed(42)
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(y = country)) +
+  geom_rect(
+    aes(
+      xmin = 0,
+      xmax = mean_rating,
+      ymin = as.numeric(factor(country)) - 0.4,
+      ymax = as.numeric(factor(country)) + 0.4
+    ),
+    fill = "skyblue",
+    color = "black"
+  ) +
+  theme_minimal(base_size = 22) +
+  coord_cartesian(xlim = c(80, 86)) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+
+## **How to Lie with Statistics (1954)**
+
+* Huff argues that truncating the y-axis can exaggerate differences and mislead the viewer.
+* It creates a false impression of dramatic change where the actual variation is small.
+
+. . .
+
+![](img/lie_with_stat.png){style="width: 100%; display: block; margin: auto;"}
+
+## **The Visual Display of Quantitative Information (1983)**
+
+* Tufte prioritizes data density and the detection of subtle patterns.
+* He argues that starting at zero can waste valuable space, obscuring meaningful variations.
+
+. . .
+
+::: {.column width="45%"}
+**Combined MMR vaccination rate, 1994/95 to 2014/15, England**
+
+Vaccination levels are consistently high over the last 20 years. So there’s nothing to worry about, right?
+
+![](img/mmr-starts-from-0.png)
+:::
+
+
+::: {.column width="50%"}
+**Take another look, axis doesn't start at zero**
+
+An optional break symbol that can help draw attention to the fact axis doesn’t start at zero.
+Swap from a “don’t worry” version to a “there is still work to be done” version.
+
+![](img/mmr-not-from-zero.png)
+:::
+
+## Position, but not a common scale
+
+::: {.column width="40%"}
+1. Position on a common scale
+2. <span style = "color: orange">Position on non-aligned scales</span>
+3. Length
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+:::
+
+::: {.column width="60%"}
+```{r fig.height=10.5, fig.width=12}
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(x = mean_rating, y = 1)) +
+  # add a horizontal line at y = 1
+  geom_hline(yintercept = 1) +
+  geom_point(color = "black", size = 3) +
+  facet_wrap(~country) +
+  coord_cartesian(xlim = c(80, 86)) +
+  theme_minimal(base_size = 22) +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+## Position, and a common scale
+
+::: {.column width="40%"}
+1. <span style = "color: orange">Position on a common scale</span>
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+:::
+
+::: {.column width="60%"}
+```{r fig.height=10.5}
+country_summary %>%
+  mutate(country = fct_reorder(country, mean_rating)) %>%
+  ggplot(aes(x = mean_rating, y = country)) +
+  # add a horizontal line at y = 1
+  geom_hline(yintercept = 1) +
+  geom_point(color = "black", size = 3) +
+  coord_cartesian(xlim = c(80, 86)) +
+  theme_minimal(base_size = 22) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+## Position, and a common scale
+
+::: {.column width="40%"}
+1. <span style = "color: orange">Position on a common scale</span>
+2. Position on non-aligned scales
+3. Length
+4. Angle
+5. Area
+6. Volume <> Density <> Color saturation
+7. Color hue 
+:::
+
+::: {.column width="60%"}
+```{r fig.height=10.5}
+country_summary %>%
+  ggplot(aes(x = mean_rating, y = country)) +
+  # add a horizontal line at y = 1
+  geom_hline(yintercept = 1) +
+  geom_point(color = "black", size = 3) +
+  coord_cartesian(xlim = c(80, 86)) +
+  theme_minimal(base_size = 22) +
+  labs(x = "average ratings", y = "country")
+```
+:::
+
+
+<div style="position:absolute; top:75%; left:0%; 
+transform:translateY(-50%); color:red">
+Re-ranking categorical variables still matters!
+</div>
+
+## Climate stripes: a discussion
+
+Climate stripes are a popular visualization of global temperature trends. They use color hue to represent temperature anomalies.
+
+![](img/climate_stripes.png){style="height: 400px; width: 2000px"}
+<div style="text-align: right; font-size: 22px">Source: Ed Hawkins/showyourstripes.info.</div>
+
+Discuss:
+
+* What are the strengths and weaknesses of the climate stripes visualization?
+* Why do you think the climate stripes have become so popular?
+* How does the emotional impact of the visualization affect its effectiveness?
+* When is it ok to sacrifice data precision for impact?
+
+
+# Outline for today
+1. How humans see data
+
+<span style="font-weight: bold; color: orange">2. Introduction to R Shiny</span>
+
+3. Introduction to Shiny Assistant
+
+4. Next-steps
+
+##  What is R Shiny?
+
+- **Shiny** is an R package that enables the creation of interactive web applications directly from R.
+- Ideal for **data visualization**, **dashboards**, and **dynamic reports**.
+- No extensive web development experience required.
+
+. . .
+
+###  Why Use Shiny?
+
+:::{.columns}
+:::{.column width="50%"}
+From this
+![](img/ucmr.png){style="width: 100%; display: block; margin: auto;"}
+
+<span style="font-size: 22px">(Hu et al, 2016)</span>
+:::
+
+:::{.column width="50%"}
+To this
+<iframe src="https://sunderlandlab.github.io/pfas_interactive_maps/PFAS_EJ_interactive_map.html" width="100%" height="500px" style="zoom: 1.5;"></iframe>
+<span style="font-size: 22px">(Liddie et al, 2023)</span>
+:::
+:::
+
+## Basic Structure of a Shiny App
+
+A Shiny app comprises two main components:
+
+![](img/shiny-anatomy.png){style="width: 100%; display: block; margin: auto;"}
+
+## Your first shiny app
+
+<iframe src=https://gallery.shinyapps.io/084-single-file/?_gl=1*pmfy4b*_ga*ODk5MzUzNTczLjE3MzUzNDQ0ODQ.*_ga_2C0WZ1JHG0*MTc0MjM5OTM0My4xOC4xLjE3NDI0MDEyMzAuMC4wLjA.html" width="100%" height="90%" style="zoom: 1.5;"></iframe>
+
+## Reactivity in Shiny
+
+- **Reactivity** is a core concept in Shiny, where changes in user inputs **automatically update** the outputs.
+- The server function **watches for input changes** and updates outputs without requiring explicit user intervention.
+
+. . .
+
+**A familiar example in spreadsheets**
+
+::: {.column width="25%"}
+![](img/spreadsheet-1.png)
+::: 
+
+::: {.column width="25%"}
+![](img/spreadsheet-2.png){.fragment}
+:::
+
+::: {.column width="25%"}
+![](img/spreadsheet-3.png){.fragment}
+:::
+
+::: {.column width="25%"}
+![](img/spreadsheet-4.png){.fragment}
+
+:::
+
+. . .
+
+In other words, the output <span style="color:orange">**reacts**</span> to changes in the input.
+
+## Back to the toy example
+
+```{r echo = TRUE, eval = FALSE, `code-line-numbers`="5-8"}
+# Global variables can go here
+n <- 200
+
+# Define the UI
+ui <- bootstrapPage(
+  numericInput(inputId = 'n', label = 'Number of obs', value = n),
+  plotOutput(outputId = 'myplot')
+)
+
+# Define the server code
+server <- function(input, output) {
+  output$myplot <- renderPlot({
+    hist(runif(input$n))
+  })
+}
+
+# Return a Shiny app object
+shinyApp(ui = ui, server = server)
+```
+:::{.columns}
+:::{.column width="50%"}
+- **`numericInput('n', 'Number of obs', n)`**
+  - Creates a **numeric input** box where users enter a number.
+  - `'n'` → The **input ID** (referenced in the server).
+  - `'Number of obs'` → The **label** displayed next to the input field.
+:::
+:::{.column width="50%"}
+- **`plotOutput('myplot')`**
+  - Reserves space in the UI to display a **plot**.
+  - `'myplot'` → The **output ID** (referenced in the server function).
+:::
+:::
+
+## Back to the toy example
+
+```{r echo = TRUE, eval = FALSE, `code-line-numbers`="11-14"}
+# Global variables can go here
+n <- 200
+
+# Define the UI
+ui <- bootstrapPage(
+  numericInput(inputId = 'n', label = 'Number of obs', value = n),
+  plotOutput(outputId = 'myplot')
+)
+
+# Define the server code
+server <- function(input, output) {
+  output$myplot <- renderPlot({
+    hist(runif(input$n))
+  })
+}
+
+# Return a Shiny app object
+shinyApp(ui = ui, server = server)
+```
+
+- **`output$myplot <- renderPlot({...})`**
+  - Assigns a dynamically generated plot to the UI element `plotOutput("plot")`.
+  - Uses `renderPlot()`, which is a Shiny function for rendering **reactive** plots.
+
+- **`hist(runif(input$n))`**
+  - Generates a histogram of **random uniform numbers**.
+  - `runif(input$n)`: Produces `n` random numbers from a **uniform distribution** between 0 and 1.
+  - Each time `input$n` changes, the histogram updates automatically.
+
+## UI Inputs
+![](img/cheatsheet-inputs.png){style="width: 100%; display: block; margin: auto;"}
+
+## Rendering functions
+![](img/cheatsheet-rendering.png){style="width: 100%; display: block; margin: auto;"}
+
+## Diving deeper into reactive programming
+
+Three components of reactive objects exist in Shiny and they are:
+
+* A reactive input is a user input that comes through the browser interface
+* A reactive output is something that appears in the user's browser window, such as a plot or a table
+* A reactive expression is a component between an input and an output
+
+![](img/input-expression-output.png){style="width: 70%"}
+
+## 1. **ui**: Add a UI element for the user to select which species of coffee beans they want to plot with selectInput().
+
+:::{.columns}
+:::{.column width="10%"}
+
+![](img/reactive-input.png)
+:::
+
+:::{.column width="90%"}
+```{r echo = TRUE, eval=FALSE}
+selectInput(
+  inputId = "country_filter",
+  label = "Select country:",
+  choices = c("All", sort(unique(coffee_clean$country_of_origin))),
+  selected = "All"
+)
+```
+- We define an **`inputId()`** that we’ll use to refer to the input element to later in the app
+- We come up with a user facing **`label`**
+- We specify the choices users can select from, as well as a default choice
+:::
+
+:::
+
+## 2. **server**: Filter for chosen coffee beans and save the new data frame as a reactive expression.
+
+:::{.columns}
+:::{.column width="10%"}
+
+![](img/reactive-expression.png)
+:::
+
+:::{.column width="90%"}
+```{r echo = TRUE, eval=FALSE}
+filtered_data <- reactive({
+  data <- coffee_clean
+  if (input$country_filter != "All") {
+    data <- data %>% filter(country_of_origin == input$country_filter)
+  }
+  return(data)
+})
+```
+- This creates a **cached expression** that knows it is out of date when its input changes 
+- We check the necessity of filtering based on the user input
+- We surround the expression with curly braces
+:::
+
+:::
+
+## 3. **server**: Use filtered_data (which is reactive) for plotting.
+
+:::{.columns}
+:::{.column width="10%"}
+
+![](img/reactive-output.png)
+:::
+
+:::{.column width="90%"}
+```{r echo = TRUE, eval=FALSE}
+  output$bean_variety <- renderPlotly({
+    req(nrow(filtered_data()) > 0)
+    p <- ggplot(filtered_data(), aes(x = n, y = reorder(variety, n), fill = n)) +
+      geom_col()
+    ggplotly(p)
+  })
+  
+```
+- This creates a plot using the **`reactive expression`** we defined earlier
+- The () after **`filtered_data()`** indicates it is reactive
+- **`filtered_data()`** is a cached expression, only rerun when inputs change
+:::
+
+:::
+
+. . .
+
+**`Functions vs. reactives`**
+
+While functions and reactives help accomplish similar goals in terms of not-repeating oneself, they’re different in implementation.
+
+* Each time you call a function, R will evaluate it.
+
+* However reactive expressions are lazy, they only get executed when their input changes.
+
+## Switch to RStudio!
+![](img/congratulations.webp)
+
+# Outline for today
+
+1.  How humans see data
+
+2.  Introduction to R Shiny
+
+[3. Introduction to Shiny Assistant]{style="font-weight: bold; color: orange"}
+
+4.  Next-steps
+
+## What is Shiny Assistant?
+
+<https://gallery.shinyapps.io/assistant/>
+
+<iframe src="https://gallery.shinyapps.io/assistant/" width="100%" height="1000px" style="zoom: 1.5;">
+
+</iframe>
+
+## Use Shiny Assistant to recreate the shiny app we just saw
+**`Prompt`**
+
+::: {style="text-align: left; font-size: 22px"}
+Use the tidytuesday coffee ratings dataset, located at <https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv> to develop a dashboard.
+
+The title should be "Coffee Data Dashboard", use the shinydashboard format.
+
+On the left, there are three inputs, a drop down menu for species, a checkbox for quality category, and a multiselect box for country, pre-select "Ethiopia" and "India".
+
+On the right, there should be four plotly graphs. First one is the number of bean variety. Second is the average flavor profile shown in a radar chart. Third is a box plot showing coffee ratings by processing methods. Fourth is a choropleth map showing average coffee ratings by country.
+:::
+<iframe src="https://gallery.shinyapps.io/assistant/" width="100%" height="500px" style="zoom: 1.5;">
+</iframe>
+
+
+## Your turn!
+
+💡 **Try one of these built-in datasets to explore with Shiny Assistant!**
+
+| Dataset | Description |
+|-------------------|-----------------------------------------------------|
+| **`mtcars`** 🚗 | Car performance data (mpg, cylinders, hp) |
+| **`iris`** 🌸 | Iris flower measurements (sepal, petal, species) |
+| **`diamonds`** 💎 | Diamond pricing (carat, cut, price, etc.) |
+| **`faithful`** 🌋 | Old Faithful geyser eruptions (duration, waiting time) |
+| **`airquality`** 🌍 | New York air quality data (Ozone, Temp, Wind) |
+| **`ToothGrowth`** 🦷 | Vitamin C & tooth growth in guinea pigs |
+
+🛠️ **Try it out yourself!**
+
+💬 **What did you learn? What worked well? Any surprises?**
+
+# Outline for today
+1. How humans see data
+
+2. Introduction to R Shiny
+
+3. Introduction to Shiny Assistant
+
+<span style="font-weight: bold; color: orange">4. Next-steps</span>
+
+## You can deploy an app for free on **`shinyapps.io`**
+
+Follow [this guide](https://shiny.posit.co/r/articles/share/shinyapps/)
+
+1. Create a shinyapps.io account
+2. Open your tokens, click "Show", copy the code
+3. Run the code in RStudio
+4. Deploy your app:
+
+```{r eval = FALSE, echo = TRUE}
+library(rsconnect)
+deployApp()
+```
+
+
+## How much time do you have?
+- **10 min**: Print out this [Shiny for R cheatsheet](https://shiny.posit.co/r/articles/start/cheatsheet/)
+- **2.5 hrs**: Follow this [Posit tutorial](https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/)
+- **1 week**: If you are an EOH student, participate in the `2025 EOH Data Visualization Competition`!
+- **6 weeks**: Sign-up for `PUBH6199 Visualizing Data with R` this summer!
+- **Lifetime**: Check out resources like the `Shiny Gallery`, `TidyTuesday`, and `Mastering Shiny` book
+
+## 2025 EOH Data Visualization Competition
+
+:::{.columns}
+
+:::{.column width="60%"}
+* Must be a current EOH student to participate
+* Visualizations must be submitted via a publicly accessible URL
+* Submissions will be evaluated based on:
+  - **Clarity and insight**
+  - **Creativity and innovation**
+  - **Design and Aesthetics**
+  - **Usability and Accessibility**
+* March 21–March 28, 2025
+* Get inspiration
+  - [Information is Beautiful](https://informationisbeautiful.net/); [TidyTuesday](https://github.com/rfordatascience/tidytuesday); [R shiny gallery](https://shiny.posit.co/r/gallery/)
+* Find datasets
+  - [Kaggle](https://www.kaggle.com/datasets); [US Government Open Data](https://data.gov/); [US Census Data](https://data.census.gov/); [Tableau: Free Public Datasets](https://www.tableau.com/learn/articles/free-public-data-sets)
+
+:::
+
+:::{.column width="40%"}
+
+![](img/eoh-data-viz-comp.png){style="height: 90%; display: block; margin: auto;"}
+:::
+:::
+
+## REACH Climate and Health Research Fellowship
+
+![](img/reach_fellow_flyer.png){style="display: block; margin: auto;"}
+
+## PUBH6199 Visualizing Data with R
+![](img/pubh6199-flyer.png){style="width: 100%; display: block; margin: auto;"}
+
+## Further resources
+* **`Books`**
+  - [Mastering Shiny](https://mastering-shiny.org/), by Hadley Wickham
+  - [R for Data Science](https://r4ds.had.co.nz/), by Hadley Wickham, Mine Çetinkaya-Rundel, and Garrett Grolemund 
+* **`Podcasts`**
+  - [Tidy Tuesday](https://www.tidytuesday.com/), hosted by Jon Harmon
+  - [Data is Plural](https://podcast.data-is-plural.com/), hosted by Jeremy Singer-Vine
+* **`Decision trees for chart types`**
+  - [Chart Suggestions – A Thought-Starter](https://extremepresentation.typepad.com/files/choosing-a-good-chart-09.pdf), by A. Abela
+  - [From Data to Viz](https://www.data-to-viz.com/), by Yan Holtz & Conor Healy
+
+
+
+## Thank you!
+
+![](img/thank you.gif){style="width: 100%; display: block; margin: auto;"}
+
+:::{.r-stack}
+Slides created via Quarto
+:::
+
+:::{.r-stack}
+The template comes from [Tom Mock](https://github.com/jthomasmock/arrow-dplyr)
+:::
+
+
+
+
